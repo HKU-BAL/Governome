@@ -13,7 +13,7 @@ This repository showcases the available applications of the current version of G
 
 ## Installation
 
-### Install go1.21
+### Install go 1.21
 
 #### 1. Download the latest Golang version 1.21 by visiting the official website (https://golang.org/dl/) and copying the download link for the Linux tarball. An example is shown below:
 
@@ -91,7 +91,7 @@ ${PATH}
 
 ## Data Preprocessing
 
-In Governome, we process whole-genome data based on VCF (Variant Call Format) files. Specifically, considering that the original VCF files can be overly cumbersome, we provide a simplified version that only retains the rsID and genotype columns. You can download this simplified data here. If you find the whole-genome data to be too large, you can download a simplified version based on chromosome 20 from here. Please note that, at this moment, modify the `Seg_num` in `./auxiliary/params.go` to 2048.
+In Governome, we process whole-genome data based on VCF (Variant Call Format) files. Specifically, considering that the original VCF files can be overly cumbersome, we provide a simplified version that only retains the rsID and genotype columns. You can download this simplified data here. If you find the whole-genome data to be too large, you can download a simplified version based on `chromosome 20` from here. Please note that, at this moment, modify the `Seg_num` in `./auxiliary/params.go` to `2048`.
 
 In Governome, data is stored in encrypted form. To encrypt the raw data, you need to run the following command:
 
@@ -100,7 +100,7 @@ cd ./examples/data_process/
 go run main.go -Segment
 ```
 
-Since the 1000 Genomes dataset does not provide short tandem repeat loci, we have chosen to randomly generate this data for the 2504 individuals and encrypt it. Here is an example code:
+Since the `1000 Genomes dataset` does not provide short tandem repeat loci, we have chosen to randomly generate this data for the `2504` individuals and encrypt it. Here is an example code:
 
 ```
 go run main.go -Codis -CodisEnc
@@ -112,7 +112,7 @@ For the sake of demonstration, we have omitted the process of collaboratively ge
 go run main.go -GenKey
 ```
 
-If necessary, you can modify the `-BlockSize` parameter to select a larger block setting. Considering the memory limitations of the user, the `BlockSize` for the stream cipher key is set to 1 by default. Additionally, you can modify the `Seg_num` in `./auxiliary/params.go` to set a different number of segments.
+If necessary, you can modify the `-BlockSize` parameter to select a larger block setting. Considering the memory limitations of the user, the `-BlockSize` for the stream cipher key is set to `1` by default. Additionally, you can modify the `Seg_num` in `./auxiliary/params.go` to set a different number of segments.
 
 ## Quick Start
 
@@ -183,7 +183,7 @@ cd ../search_person/
 go run -GroundTruth ${Your Target Person's ID, 0 ~ 2503}
 ```
 
-Here, you can use -GroundTruth to set the individuals of interest. If you do not wish to perform the query on individuals from the 1000 Genomes dataset, you can set it to -1, and we will randomly generate such individuals for you. Similarly, you can set `-Toy=false` to use secure parameters, and add `-ReadKey` and `-Verify` to read and verify the proofs from a file if you have executed [c](https://github.com/HKU-BAL/Governome/blob/main/README.md#c-if-you-want-to-generate-all-proofs-and-ciphertexts-for-an-appid-you-can-execute-the-following-command).
+Here, you can use -GroundTruth to set the individuals of interest. If you do not wish to perform the query on individuals from the 1000 Genomes dataset, you can set it to `-1`, and we will randomly generate such individuals for you. Similarly, you can set `-Toy=false` to use secure parameters, and add `-ReadKey` and `-Verify` to read and verify the proofs from a file if you have executed [c](https://github.com/HKU-BAL/Governome/blob/main/README.md#c-if-you-want-to-generate-all-proofs-and-ciphertexts-for-an-appid-you-can-execute-the-following-command).
 
 
 ## Usage
