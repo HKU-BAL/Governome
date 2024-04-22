@@ -25,39 +25,39 @@ This repository showcases the available applications of the current version of G
 
 ### Install go1.21
 
-1. Download the latest Golang version 1.21 by visiting the official website (https://golang.org/dl/) and copying the download link for the Linux tarball. An example is shown below:
+#### 1. Download the latest Golang version 1.21 by visiting the official website (https://golang.org/dl/) and copying the download link for the Linux tarball. An example is shown below:
 
 ```
 wget https://golang.org/dl/go1.21.6.linux-amd64.tar.gz
 ```
 
-2. Extract the downloaded tarball to your preferred local directory. In this example, we'll use `$HOME/.local`:
+#### 2. Extract the downloaded tarball to your preferred local directory. In this example, we'll use `$HOME/.local`:
 
 ```
 tar -xvzf go1.21.6.linux-amd64.tar.gz -C $HOME/.local
 ```
 
-3. Remove the tarball after extraction:
+#### 3. Remove the tarball after extraction:
 
 ```
 rm go1.18.linux-amd64.tar.gz
 ```
 
-4. Set up your Go workspace and environment variables:
+#### 4. Set up your Go workspace and environment variables:
 
-a. Create the required directory structure:
+##### a. Create the required directory structure:
 
 ```
 mkdir -p $HOME/go/{bin,src,pkg}
 ```
 
-b. Open your `~/.bashrc` or `~/.profile` file with a text editor, such as vim:
+##### b. Open your `~/.bashrc` or `~/.profile` file with a text editor, such as vim:
 
 ```
 vim ~/.bashrc
 ```
 
-c. Add the following lines to the end of the file:
+##### c. Add the following lines to the end of the file:
 
 ```
 export GOPATH=$HOME/go
@@ -65,15 +65,15 @@ export GOROOT=$HOME/.local/go
 export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
 ```
 
-d. Save the file and exit the text editor.
+##### d. Save the file and exit the text editor.
 
-e. Apply the changes to your current session:
+##### e. Apply the changes to your current session:
 
 ```
 source ~/.bashrc
 ```
 
-5. Verify the installation:
+#### 5. Verify the installation:
 
 ```
 go version
@@ -124,20 +124,20 @@ If necessary, you can modify the `-BlockSize` parameter to select a larger block
 
 This module demonstrates how, as a Key Custodian, you will generate the ciphertext and zero-knowledge proofs that need to be submitted for a transaction. Please ensure that you have executed the corresponding command for generating the public and private key pair for TFHE.
 
-a. If you are interested in observing how zero-knowledge proofs are generated, please execute the following command:
+#### a. If you are interested in observing how zero-knowledge proofs are generated, please execute the following command:
 
 ```
 cd ../user_proof
 go run main.go -Rsid ${Your Target rsID} -Username ${DataOwner Name, e.g. HG00096} -ID ${key custodian ID, 1 or 2 here}
 ```
 
-b. If you want to generate all proofs and ciphertexts for a rsid, you can execute the following command:
+#### b. If you want to generate all proofs and ciphertexts for a rsid, you can execute the following command:
 
 ```
 go run main.go -All -Rsid ${Your Target rsID} 
 ```
 
-c. If you want to generate all proofs and ciphertexts for an appID, you can execute the following command:
+#### c. If you want to generate all proofs and ciphertexts for an appID, you can execute the following command:
 
 ```
 go run main.go -All -APPID ${Your Target appID} 
@@ -154,7 +154,7 @@ cd ../data_owner_query/
 go run main.go -Rsid ${Your Target rsID} -Username ${DataOwner Name, e.g. HG00096}
 ```
 
-For the sake of demonstration, the parameters used here are highly insecure. If you wish to use secure parameters, please add the statement -Toy=false. If you have executed b when [generating proofs](https://github.com/HKU-BAL/Governome?tab=readme-ov-file#upload-a-segkey-and-generating-a-proof), you may also choose to add -ReadKey and -Verify to read and verify the proofs from a file.
+For the sake of demonstration, the parameters used here are highly insecure. If you wish to use secure parameters, please add the statement `-Toy=false`. If you have executed b when [generating proofs](https://github.com/HKU-BAL/Governome?tab=readme-ov-file#upload-a-segkey-and-generating-a-proof), you may also choose to add `-ReadKey` and `-Verify` to read and verify the proofs from a file.
 
 ### Single SNP Query
 
