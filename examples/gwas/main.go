@@ -90,7 +90,7 @@ func GWAS(Parameter tfhe.ParametersLiteral[uint32], rsid string, population stri
 func main() {
 
 	rsid := flag.String("Rsid", "rs6053810", "Target Site")
-	population := flag.String("Population", "EUR", "Population")
+	population := flag.String("Population", "EUR", "Population, in 'AFR', 'AMR', 'EAS', 'EUR', 'SAS'")
 	toy := flag.Bool("Toy", true, "Whether using Toy Parameters")
 	readsymbol := flag.Bool("ReadKey", false, "Whether read Data from file, not suitable for toy params")
 	verifysymbol := flag.Bool("Verify", false, "Whether verifying the proofs")

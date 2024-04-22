@@ -86,7 +86,6 @@ func Trivium_Search(query_target applications.CODIS, Parameter tfhe.ParametersLi
 
 func main() {
 
-	datalen := flag.Int("DataLen", 2504, "Participate Number")
 	toy := flag.Bool("Toy", true, "Whether using Toy Parameters")
 	GroundTruthID := flag.Int("GroundTruth", 0, "GroundTruthID")
 	readsymbol := flag.Bool("ReadKey", false, "Whether read Data from file, not suitable for toy params")
@@ -100,20 +99,10 @@ func main() {
 		query_target = applications.GenRandomCODIS()
 	}
 
-	if *datalen >= 2504 || *datalen < 0 {
-		fmt.Println("Invalid Data Length!")
-		return
-	}
-
-	if *datalen == 0 {
-		*datalen = 2504
-	}
-
 	if *toy {
-		Trivium_Search(query_target, auxiliary.ParamsToyBoolean, *datalen, *readsymbol, *verifysymbol)
-
+		Trivium_Search(query_target, auxiliary.ParamsToyBoolean, 2504, *readsymbol, *verifysymbol)
 	} else {
-		Trivium_Search(query_target, tfhe.ParamsBinaryOriginal, *datalen, *readsymbol, *verifysymbol)
+		Trivium_Search(query_target, tfhe.ParamsBinaryOriginal, 2504, *readsymbol, *verifysymbol)
 	}
 
 }

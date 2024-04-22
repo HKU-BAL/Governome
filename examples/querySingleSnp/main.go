@@ -1,6 +1,7 @@
 package main
 
 import (
+	"Governome/applications"
 	"Governome/auxiliary"
 	"Governome/snarks"
 	"Governome/streamcipher/trivium"
@@ -13,7 +14,7 @@ import (
 	"github.com/sp301415/tfhe-go/tfhe"
 )
 
-func QueryTrivium(Parameter tfhe.ParametersLiteral[uint32], rsid string, DataLen int, Readsymbol bool, Verifysymbol bool) {
+func QueryTrivium(Parameter tfhe.ParametersLiteral[uint32], rsid string, population string, Readsymbol bool, Verifysymbol bool) {
 	params := Parameter.Compile()
 
 	enc := tfhe.NewBinaryEncryptor(params)
@@ -23,7 +24,9 @@ func QueryTrivium(Parameter tfhe.ParametersLiteral[uint32], rsid string, DataLen
 
 	eval := tfhe.NewBinaryEvaluator(params, enc.GenEvaluationKeyParallel())
 
-	Indiv := auxiliary.ReadIndividuals()[0:DataLen]
+	WholeIndivs := auxiliary.ReadIndividuals()
+	Indiv, _, _, _ := applications.ReadPhenotype(WholeIndivs, population)
+	DataLen := len(Indiv)
 
 	segkey1 := make([][]tfhe.LWECiphertext[uint32], DataLen)
 	segkey2 := make([][]tfhe.LWECiphertext[uint32], DataLen)
@@ -78,21 +81,16 @@ func QueryTrivium(Parameter tfhe.ParametersLiteral[uint32], rsid string, DataLen
 func main() {
 
 	rsid := flag.String("Rsid", "rs6053810", "Target Site")
-	datalen := flag.Int("DataLen", 2504, "Participate Number")
+	population := flag.String("Population", "EUR", "Population, in 'AFR', 'AMR', 'EAS', 'EUR', 'SAS'")
 	toy := flag.Bool("Toy", true, "Whether using Toy Parameters")
 	readsymbol := flag.Bool("ReadKey", false, "Whether read Data from file, not suitable for toy params")
 	verifysymbol := flag.Bool("Verify", false, "Whether verifying the proofs")
 	flag.Parse()
 
-	if *datalen > 2504 || *datalen < 0 {
-		fmt.Println("Invalid Data Length!")
-		return
-	}
-
 	if *toy {
-		QueryTrivium(auxiliary.ParamsToyBoolean, *rsid, *datalen, *readsymbol, *verifysymbol)
+		QueryTrivium(auxiliary.ParamsToyBoolean, *rsid, *population, *readsymbol, *verifysymbol)
 	} else {
-		QueryTrivium(tfhe.ParamsBinaryOriginal, *rsid, *datalen, *readsymbol, *verifysymbol)
+		QueryTrivium(tfhe.ParamsBinaryOriginal, *rsid, *population, *readsymbol, *verifysymbol)
 	}
 
 }
