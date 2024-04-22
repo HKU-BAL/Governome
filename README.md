@@ -9,21 +9,7 @@
 
 Governome is the first owner-governed genomic data management framework, which can assist Data Owners in maintaining absolute control over their genomics data, including the final decision-making authority and the right to be informed.
 
-For a system to qualify as owner-governed genomic data management, it must meet the following three criteria:
-
-### Owner Authority (OA)
-
-Owners have absolute control over their owned genomic data. At any given time, data owners should be able to modify the access permissions of their genomic data in the system, including revoking the data access entirely from any institution or party. OA also includes data owners' access to complete data usage logs that are guaranteed authentic.
-
-### Lifecycle Data Encryption (LDE)
-
-Data remains encrypted throughout its lifecycle in the system, ensuring it is never decrypted or accessed in raw form. The encryption  should comprehensively apply to users’ raw data or intermediate computational results in the stage of storage, exchange, and computation. Any party, including the data owner, should not have direct access to raw information except the query result provided by the system.
-
-### Computational Detrustification (CD)
-
-All computational processes within the system are verifiable, independent of the honesty of the computation participants. The transaction initiator, who raises the computation, should be able to identify any dishonest behavior during computation, ensuring computational integrity.
-
-This repository showcases the available applications of the current version of Governome, including data preprocessing for whole-genome data, population single variant queries, GWAS analysis, and a functional batch for identifying target individuals. Additionally, this repository demonstrates how Key Custodians upload information and provide proofs to participate in the workflow of Governome.
+This repository showcases the available applications of the current version of Governome, including data preprocessing for whole-genome data, population single variant queries, GWAS analysis, and a functional batch for identifying target individuals. Additionally, this repository demonstrates how Key Custodians upload information and provide proofs to participate in the workflow of Governome. All the homomorphical computation modules in Governome are based on the excellent library [tfhe-go](https://github.com/sp301415/tfhe-go), and all the zk-SNARKs modules in Governome are based on [gnark](https://github.com/Consensys/gnark/tree/master).
 
 ## Installation
 
