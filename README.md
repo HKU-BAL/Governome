@@ -156,11 +156,11 @@ For the sake of demonstration, the parameters used here are highly insecure. If 
 
 ### Single SNP Query
 
-As the head of a pharmaceutical company, you and your team intend to develop a new drug based on a specific target SNP. However, you are uncertain about the true correlation between the target and the disease. In this regard, you can initiate a distribution query to Governome regarding this target. The command is as follows:
+As the head of a pharmaceutical company, you and your team intend to develop a new drug based on a specific target SNP. However, you are uncertain about the true correlation between the target and the disease over a specific population. In this regard, you can initiate a distribution query to Governome regarding this target. The command is as follows:
 
 ```
 cd ../querySingleSnp/
-go run main.go -Rsid ${Your Target rsID}
+go run main.go -Rsid ${Your Target rsID} -Population ${Your interested population, e.g. EUR}
 ```
 
 And you will obtain the result you are interested in. Similarly, you can set `-Toy=false` to use secure parameters, and add `-ReadKey` and `-Verify` to read and verify the proofs from a file.
@@ -252,8 +252,8 @@ Here, you can use -GroundTruth to set the individuals of interest. If you do not
 #### Usage of ./example/querySingleSnp/main.go:
 
 ```
-  -DataLen int
-    	Participate Number (default 2504)
+  -Population string
+    	Population, in 'AFR', 'AMR', 'EAS', 'EUR', 'SAS' (default "EUR")
   -ReadKey
     	Whether read Data from file, not suitable for toy params
   -Rsid string
@@ -270,7 +270,7 @@ Here, you can use -GroundTruth to set the individuals of interest. If you do not
 
 ```
   -Population string
-    	Population (default "EUR")
+    	Population, in 'AFR', 'AMR', 'EAS', 'EUR', 'SAS' (default "EUR")
   -ReadKey
     	Whether read Data from file, not suitable for toy params
   -Rsid string
@@ -286,8 +286,6 @@ Here, you can use -GroundTruth to set the individuals of interest. If you do not
 #### Usage of ./example/search_person/main.go:
 
 ```
-  -DataLen int
-    	Participate Number (default 2504)
   -GroundTruth int
     	GroundTruthID
   -ReadKey
