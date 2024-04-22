@@ -154,7 +154,7 @@ cd ../data_owner_query/
 go run main.go -Rsid ${Your Target rsID} -Username ${DataOwner Name, e.g. HG00096}
 ```
 
-For the sake of demonstration, the parameters used here are highly insecure. If you wish to use secure parameters, please add the statement `-Toy=false`. If you have executed b when [generating proofs](https://github.com/HKU-BAL/Governome?tab=readme-ov-file#upload-a-segkey-and-generating-a-proof), you may also choose to add `-ReadKey` and `-Verify` to read and verify the proofs from a file.
+For the sake of demonstration, the parameters used here are highly insecure. If you wish to use secure parameters, please add the statement `-Toy=false`. If you have executed [b](https://github.com/HKU-BAL/Governome/blob/main/README.md#b-if-you-want-to-generate-all-proofs-and-ciphertexts-for-a-rsid-you-can-execute-the-following-command), you may also choose to add `-ReadKey` and `-Verify` to read and verify the proofs from a file.
 
 ### Single SNP Query
 
@@ -187,7 +187,7 @@ cd ../search_person/
 go run -GroundTruth ${Your Target Person's ID, 0 ~ 2503}
 ```
 
-Here, you can use -GroundTruth to set the individuals of interest. If you do not wish to perform the query on individuals from the 1000 Genomes dataset, you can set it to -1, and we will randomly generate such individuals for you. Similarly, you can set `-Toy=false` to use secure parameters, and add `-ReadKey` and `-Verify` to read and verify the proofs from a file if you have executed c when [generating proofs](https://github.com/HKU-BAL/Governome?tab=readme-ov-file#upload-a-segkey-and-generating-a-proof).
+Here, you can use -GroundTruth to set the individuals of interest. If you do not wish to perform the query on individuals from the 1000 Genomes dataset, you can set it to -1, and we will randomly generate such individuals for you. Similarly, you can set `-Toy=false` to use secure parameters, and add `-ReadKey` and `-Verify` to read and verify the proofs from a file if you have executed [c](https://github.com/HKU-BAL/Governome/blob/main/README.md#c-if-you-want-to-generate-all-proofs-and-ciphertexts-for-an-appid-you-can-execute-the-following-command).
 
 
 ## Usage
