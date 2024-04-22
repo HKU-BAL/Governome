@@ -74,7 +74,10 @@ go version
 You can clone this repo as following:
 
 ```
+mkdir Governome_RootFolder
+cd Governome_RootFolder
 git clone git@github.com:HKU-BAL/Governome.git
+cd Governome
 ```
 
 We advise to organize the data in the following way to ensure the efficiency of accessing and processing data:
