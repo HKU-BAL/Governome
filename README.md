@@ -88,7 +88,7 @@ go version
 We advise to organize the data in the following way to ensure the efficiency of accessing and processing data:
 
 ```
-${DATAPATH}
+${PATH}
 └── Governome/
     ├── Governome_Code/
     ├── Plaintext_Data/
