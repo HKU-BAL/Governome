@@ -1,3 +1,7 @@
+<div align="center">
+    <img src="docs/images/logo.png" width = "110" height = "90" alt="Governome_logo">
+</div>
+
 # Governome - Governome: An owner-governed genomic data management framework based on blockchain
 
 
