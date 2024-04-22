@@ -176,7 +176,7 @@ Noted that the the Phenotype comes from Hail, you can download it here. The defa
 
 ### Search Person
 
-As a law enforcement agency, you have encountered individuals with unidentified identities in your jurisdiction. To determine their identities, you can use Governome's functional batch to confirm their identities. Here, the individual's identity is no longer represented by strings like "HG00096" but is standardized as integers from 0 to 2503. You can run the following command:
+As a law enforcement agency, you have encountered individuals with unidentified identities in your jurisdiction. To determine their identities, you can use Governome's functional batch to confirm their identities. Here, the individual's identity is no longer represented by strings like `HG00096` but is standardized as integers from `0` to `2503`. You can run the following command:
 
 ```
 cd ../search_person/
