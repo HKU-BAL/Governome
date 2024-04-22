@@ -190,7 +190,43 @@ Here, you can use -GroundTruth to set the individuals of interest. If you do not
 
 ### Data Preprocessing
 
+#### Usage of /example/data_process/main:
+
+```
+  -BlockSize int
+    	BlockSize for the keys for zk-snarks (default 1)
+  -Codis
+    	Whether to generate the codis data
+  -CodisEnc
+    	Whether to encrypt the codis data
+  -GenKey
+    	Whether to generate the keys
+  -Segment
+    	Whether to preprocess the data to segments
+  -Toy
+    	Whether using Toy Parameters
+```
+
 ### Upload a SegKey and generating a proof
+
+#### Usage of /example/user_proof/main:
+
+```
+  -APPID int
+    	AppID for all individual (default -1)
+  -All
+    	Whether include all Individuals
+  -ID int
+    	1 or 2, different key custodians (default 1)
+  -Rsid string
+    	Target Site (default "rs6053810")
+  -User string
+    	User Name (default "HG00096")
+  -begin int
+    	Begin ID when generate all
+  -end int
+    	Begin ID when generate all (default 2504)
+```
 
 ### User query
 
