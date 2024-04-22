@@ -85,12 +85,18 @@ go version
 
 ### Clone this repo
 
+You can clone this repo as following:
+
+```
+git clone git@github.com:HKU-BAL/Governome.git
+```
+
 We advise to organize the data in the following way to ensure the efficiency of accessing and processing data:
 
 ```
 ${PATH}
-└── Governome/
-    ├── Governome_Code/
+└── Governome_RootFolder/
+    ├── Governome/
     ├── Plaintext_Data/
     ├── Individuals/
     ├── Phenotype/
