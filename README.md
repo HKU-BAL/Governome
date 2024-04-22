@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="docs/images/logo.png" width = "110" height = "90" alt="Governome_logo">
+    <img src="docs/images/logo.png" width = "210" height = "190" alt="Governome_logo">
 </div>
 
 # Governome - Governome: An owner-governed genomic data management framework based on blockchain
