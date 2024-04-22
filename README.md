@@ -190,7 +190,7 @@ Here, you can use -GroundTruth to set the individuals of interest. If you do not
 
 ### Data Preprocessing
 
-#### Usage of /example/data_process/main:
+#### Usage of ./example/data_process/main.go:
 
 ```
   -BlockSize int
@@ -209,7 +209,7 @@ Here, you can use -GroundTruth to set the individuals of interest. If you do not
 
 ### Upload a SegKey and generating a proof
 
-#### Usage of /example/user_proof/main:
+#### Usage of ./example/user_proof/main.go:
 
 ```
   -APPID int
@@ -230,9 +230,69 @@ Here, you can use -GroundTruth to set the individuals of interest. If you do not
 
 ### User query
 
+#### Usage of ./example/data_owner_query/main.go:
+
+```
+  -ReadKey
+    	Whether read Data from file, not suitable for toy params
+  -Rsid string
+    	Target Site (default "rs6053810")
+  -Toy
+    	Whether using Toy Parameters (default true)
+  -User string
+    	Data Owner Nickname (default "HG00096")
+  -Verify
+    	Whether verifying the proofs
+```
+
 ### Single SNP Query
+
+#### Usage of ./example/querySingleSnp/main.go:
+
+```
+  -DataLen int
+    	Participate Number (default 2504)
+  -ReadKey
+    	Whether read Data from file, not suitable for toy params
+  -Rsid string
+    	Target Site (default "rs6053810")
+  -Toy
+    	Whether using Toy Parameters (default true)
+  -Verify
+    	Whether verifying the proofs
+```
 
 ### Single SNP GWAS
 
+#### Usage of ./example/gwas/main.go:
+
+```
+  -Population string
+    	Population (default "EUR")
+  -ReadKey
+    	Whether read Data from file, not suitable for toy params
+  -Rsid string
+    	Target Site (default "rs6053810")
+  -Toy
+    	Whether using Toy Parameters (default true)
+  -Verify
+    	Whether verifying the proofs
+```
+
 ### Search Person
+
+#### Usage of ./example/search_person/main.go:
+
+```
+  -DataLen int
+    	Participate Number (default 2504)
+  -GroundTruth int
+    	GroundTruthID
+  -ReadKey
+    	Whether read Data from file, not suitable for toy params
+  -Toy
+    	Whether using Toy Parameters (default true)
+  -Verify
+    	Whether verifying the proofs
+```
 
