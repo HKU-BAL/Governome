@@ -83,8 +83,7 @@ cd Governome
 We advise to organize the data in the following way to ensure the efficiency of accessing and processing data:
 
 ```
-${PATH}
-└── Governome_RootFolder/
+Governome_RootFolder/
     ├── Governome/
     ├── Plaintext_Data/
     ├── Individuals/
