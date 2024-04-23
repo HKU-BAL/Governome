@@ -6,8 +6,16 @@ import (
 	"flag"
 )
 
-func GenProof(rsid string, username string, keyholderID int) {
-	snarks.UserProof(false, username, keyholderID, auxiliary.SegmentID(username, auxiliary.RsID_s2i(rsid), auxiliary.Seg_num))
+func GenProof(rsid string, user_name string, keyholderID int) {
+	Indivs := auxiliary.ReadIndividuals()
+	var people auxiliary.People
+	for i := 0; i < len(Indivs); i++ {
+		if Indivs[i].Name == user_name {
+			people = Indivs[i]
+			break
+		}
+	}
+	snarks.UserProof(false, people, keyholderID, auxiliary.SegmentID(people, auxiliary.RsID_s2i(rsid), auxiliary.Seg_num))
 }
 
 func GenAllProofForRSID(rsid string, begin, end int) {

@@ -18,9 +18,9 @@ var Batch_Size_Set = [PointNum]int{1, 2, 4, 5, 8, 10, 16, 20, 40, 80}
 
 // This function generate the Key Information held by key holders, along with its public hash value
 // keyholderID: 1, 2, ...
-func GenerateRawKey(indivname string, keyholderID int) ([]byte, []byte) {
+func GenerateRawKey(people auxiliary.People, keyholderID int) ([]byte, []byte) {
 	rawstr := make([]string, 1)
-	rawstr[0] = "Welcome to Governome, key holder" + strconv.Itoa(keyholderID) + " of " + indivname + "!"
+	rawstr[0] = "Welcome to Governome, key holder" + strconv.Itoa(keyholderID) + " of " + people.Name + "!"
 	keyinfo, _ := auxiliary.MimcHash(rawstr, auxiliary.Curve, auxiliary.Mimchashcurve)
 	keyhash, _ := auxiliary.MimcHashRaw(keyinfo, auxiliary.Mimchashcurve)
 	return keyinfo, keyhash

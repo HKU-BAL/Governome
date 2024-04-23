@@ -219,7 +219,7 @@ func EncAndSaveCODIS_Trivium(batch_size int) {
 	}
 	new_data := Decode_CODIS(enc_cods)
 
-	file_name := "BatchSize_" + strconv.Itoa(batch_size) + ".csv"
+	file_name := "BlockSize_" + strconv.Itoa(batch_size) + ".csv"
 	os.Mkdir("../../../CODIS_Data/Trivium_Enc_CODIS_Data", os.ModePerm)
 	file_path := "../../../CODIS_Data/Trivium_Enc_CODIS_Data/" + file_name
 
@@ -241,7 +241,7 @@ func EncAndSaveCODIS_Trivium(batch_size int) {
 	w.Flush()
 	f.Close()
 
-	fmt.Printf("BatchSize: "+strconv.Itoa(batch_size)+", Finish Encrypt and Save CODIS of "+strconv.Itoa(len(Indivs))+" Individuals in (%s)\n", time.Since(now))
+	fmt.Printf("BlockSize: "+strconv.Itoa(batch_size)+", Finish Encrypt and Save CODIS of "+strconv.Itoa(len(Indivs))+" Individuals in (%s)\n", time.Since(now))
 
 }
 
@@ -250,7 +250,7 @@ func ReadCODISData(batch_size int) (res []applications.CODIS, hash1, hash2 [][]b
 
 	Indivs := auxiliary.ReadIndividuals()
 
-	file_name := "BatchSize_" + strconv.Itoa(batch_size) + ".csv"
+	file_name := "BlockSize_" + strconv.Itoa(batch_size) + ".csv"
 	file_path := "../../../CODIS_Data/Trivium_Enc_CODIS_Data/" + file_name
 
 	path, _ := filepath.Abs(file_path)

@@ -1,10 +1,8 @@
 package auxiliary
 
 import (
-	"bytes"
 	"math"
 	"math/rand"
-	"os"
 
 	"github.com/sp301415/tfhe-go/math/csprng"
 	"github.com/sp301415/tfhe-go/tfhe"
@@ -184,23 +182,23 @@ func EncWithPublicKeyForZKSnarks_tfheb(val uint32, pk PublicKey_tfheb) (ct tfhe.
 	return
 }
 
-// Save tfhe ciphertext
-func SaveCiphertextb(ct tfhe.LWECiphertext[uint32], file_name string) {
+// // Save tfhe ciphertext
+// func SaveCiphertextb(ct tfhe.LWECiphertext[uint32], path, file_name string) {
 
-	os.Mkdir("../../../TFHE_Ciphertext_Trivium/", os.ModePerm)
+// 	os.Mkdir("../../../TFHE_Ciphertext_Trivium/", os.ModePerm)
 
-	var buf bytes.Buffer
-	ct.WriteTo(&buf)
-	os.WriteFile("../../../TFHE_Ciphertext_Trivium/"+file_name, buf.Bytes(), 0644)
+// 	var buf bytes.Buffer
+// 	ct.WriteTo(&buf)
+// 	os.WriteFile("../../../TFHE_Ciphertext_Trivium/"+file_name, buf.Bytes(), 0644)
 
-}
+// }
 
-// Read tfhe ciphertext
-func ReadCiphertextb(params tfhe.Parameters[uint32], file_name string) (ct tfhe.LWECiphertext[uint32]) {
-	var buf bytes.Buffer
-	file, _ := os.ReadFile("../../../TFHE_Ciphertext_Trivium/" + file_name)
-	buf.Write(file)
+// // Read tfhe ciphertext
+// func ReadCiphertextb(params tfhe.Parameters[uint32], file_name string) (ct tfhe.LWECiphertext[uint32]) {
+// 	var buf bytes.Buffer
+// 	file, _ := os.ReadFile("../../../TFHE_Ciphertext_Trivium/" + file_name)
+// 	buf.Write(file)
 
-	ct.ReadFrom(&buf)
-	return
-}
+// 	ct.ReadFrom(&buf)
+// 	return
+// }

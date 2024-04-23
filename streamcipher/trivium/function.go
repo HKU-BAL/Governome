@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math"
 	"math/big"
 	"os"
 	"path/filepath"
@@ -24,11 +25,17 @@ func EncryptAndSaveData(batch_size int) {
 
 	now := time.Now()
 
-	subfolder := "BatchSize_" + strconv.Itoa(batch_size)
+	Indivs := auxiliary.ReadIndividuals()
+
+	blockfolder := "BlockSize_" + strconv.Itoa(batch_size)
 
 	os.Mkdir("../../../Segments_Enc_Data_Trivium", os.ModePerm)
-	os.Mkdir("../../../Segments_Enc_Data_Trivium/"+subfolder, os.ModePerm)
-	Indivs := auxiliary.ReadIndividuals()
+	os.Mkdir("../../../Segments_Enc_Data_Trivium/"+blockfolder, os.ModePerm)
+
+	subfoldernum := int(math.Ceil(float64(len(Indivs)) / 100))
+	for i := 0; i < subfoldernum; i++ {
+		os.Mkdir("../../../Segments_Enc_Data_Trivium/"+blockfolder+"/"+strconv.Itoa(i*100)+"-"+strconv.Itoa(min(len(Indivs), i*100+99)), os.ModePerm)
+	}
 
 	numCores := runtime.NumCPU()
 
@@ -49,13 +56,10 @@ func EncryptAndSaveData(batch_size int) {
 			keyinfo1, keyhash1 := GenerateRawKey(Indivs[index], 1)
 			keyinfo2, keyhash2 := GenerateRawKey(Indivs[index], 2)
 
-			// fullhash1 := GenFullHash(keyinfo1, batch_size)
-			// fullhash2 := GenFullHash(keyinfo2, batch_size)
-
 			enc_data := Data_Enc(Encoded_Variants, keyinfo1, keyinfo2, batch_size)
-			string_data := SegmentToStrings(enc_data, keyhash1, keyhash2, Indivs[index])
-			file_name := Indivs[index] + "_Segments.csv"
-			file_path := "../../../Segments_Enc_Data_Trivium/" + subfolder + "/" + file_name
+			string_data := SegmentToStrings(enc_data, keyhash1, keyhash2, Indivs[index].Name)
+			file_name := Indivs[index].Name + "_Segments.csv"
+			file_path := "../../../Segments_Enc_Data_Trivium/" + blockfolder + "/" + auxiliary.MappingPeopletoFolder(Indivs[index]) + "/" + file_name
 			f, _ := os.Create(file_path)
 			w := csv.NewWriter(f)
 
@@ -71,15 +75,15 @@ func EncryptAndSaveData(batch_size int) {
 
 	wg.Wait()
 
-	fmt.Printf("BatchSize: "+strconv.Itoa(batch_size)+", Finish Data Encryption and Save of "+strconv.Itoa(len(Indivs))+" Individuals in (%s)\n", time.Since(now))
+	fmt.Printf("BlockSize: "+strconv.Itoa(batch_size)+", Finish Data Encryption and Save of "+strconv.Itoa(len(Indivs))+" Individuals in (%s)\n", time.Since(now))
 
 }
 
 // Read a ciphertext segment
-func ReadSegmentData(Indivname string, segID int, batch_size int) (Variants []Variant, keyhash1, keyhash2 []byte) {
-	subfolder := "BatchSize_" + strconv.Itoa(batch_size)
-	file_name := Indivname + "_Segments.csv"
-	file_path := "../../../Segments_Enc_Data_Trivium/" + subfolder + "/" + file_name
+func ReadSegmentData(people auxiliary.People, segID int, batch_size int) (Variants []Variant, keyhash1, keyhash2 []byte) {
+	subfolder := "BlockSize_" + strconv.Itoa(batch_size)
+	file_name := people.Name + "_Segments.csv"
+	file_path := "../../../Segments_Enc_Data_Trivium/" + subfolder + "/" + auxiliary.MappingPeopletoFolder(people) + "/" + file_name
 	path, _ := filepath.Abs(file_path)
 	file, _ := os.Open(path)
 	defer file.Close()
@@ -90,7 +94,7 @@ func ReadSegmentData(Indivname string, segID int, batch_size int) (Variants []Va
 			break
 		}
 
-		if row[0] == Indivname {
+		if row[0] == people.Name {
 			k1 := strings.Split(row[1], ":")[1][1:]
 			kval1, _ := big.NewInt(1).SetString(k1, 0)
 			keyhash1 = kval1.Bytes()
@@ -129,10 +133,10 @@ func ReadSegmentData(Indivname string, segID int, batch_size int) (Variants []Va
 }
 
 // Read the key hash
-func ReadKeyhash(Indivname string, batch_size int) (keyhash1, keyhash2 []byte) {
-	subfolder := "BatchSize_" + strconv.Itoa(batch_size)
-	file_name := Indivname + "_Segments.csv"
-	file_path := "../../../Segments_Enc_Data_Trivium/" + subfolder + "/" + file_name
+func ReadKeyhash(people auxiliary.People, batch_size int) (keyhash1, keyhash2 []byte) {
+	subfolder := "BlockSize_" + strconv.Itoa(batch_size)
+	file_name := people.Name + "_Segments.csv"
+	file_path := "../../../Segments_Enc_Data_Trivium/" + subfolder + "/" + auxiliary.MappingPeopletoFolder(people) + "/" + file_name
 	path, _ := filepath.Abs(file_path)
 	file, _ := os.Open(path)
 	defer file.Close()
@@ -143,7 +147,7 @@ func ReadKeyhash(Indivname string, batch_size int) (keyhash1, keyhash2 []byte) {
 			break
 		}
 
-		if row[0] == Indivname {
+		if row[0] == people.Name {
 			k1 := strings.Split(row[1], ":")[1][1:]
 			kval1, _ := big.NewInt(1).SetString(k1, 0)
 			keyhash1 = kval1.Bytes()
@@ -245,7 +249,7 @@ func ReadPK(params tfhe.Parameters[uint32]) (pk auxiliary.PublicKey_tfheb) {
 }
 
 // Get Ciphertext SegKey with Public Key
-func GetSegKeyFromPK(pk auxiliary.PublicKey_tfheb, rsid int, batch_size int, Indiv []string) (res1, res2 [][]tfhe.LWECiphertext[uint32]) {
+func GetSegKeyFromPK(pk auxiliary.PublicKey_tfheb, rsid int, batch_size int, Indiv []auxiliary.People) (res1, res2 [][]tfhe.LWECiphertext[uint32]) {
 	Data_Len := len(Indiv)
 	res1 = make([][]tfhe.LWECiphertext[uint32], Data_Len)
 	res2 = make([][]tfhe.LWECiphertext[uint32], Data_Len)
@@ -283,13 +287,13 @@ func GetSegKeyFromPK(pk auxiliary.PublicKey_tfheb, rsid int, batch_size int, Ind
 
 	wg.Wait()
 
-	fmt.Printf("BatchSize: "+strconv.Itoa(batch_size)+", Finish Key Encryption of "+strconv.Itoa(Data_Len)+" Individuals in (%s)\n", time.Since(now))
+	fmt.Printf("BlockSize: "+strconv.Itoa(batch_size)+", Finish Key Encryption of "+strconv.Itoa(Data_Len)+" Individuals in (%s)\n", time.Since(now))
 
 	return
 }
 
 // Get Ciphertext SegKey with Public Key
-func GetSegKeyFromPKForAppID(pk auxiliary.PublicKey_tfheb, appid int, batch_size int, Indiv []string) (res1, res2 [][]tfhe.LWECiphertext[uint32]) {
+func GetSegKeyFromPKForAppID(pk auxiliary.PublicKey_tfheb, appid int, batch_size int, Indiv []auxiliary.People) (res1, res2 [][]tfhe.LWECiphertext[uint32]) {
 	Data_Len := len(Indiv)
 
 	res1 = make([][]tfhe.LWECiphertext[uint32], Data_Len)
@@ -327,13 +331,13 @@ func GetSegKeyFromPKForAppID(pk auxiliary.PublicKey_tfheb, appid int, batch_size
 
 	wg.Wait()
 
-	fmt.Printf("BatchSize: "+strconv.Itoa(batch_size)+", Finish Key Encryption of "+strconv.Itoa(Data_Len)+" Individuals in (%s)\n", time.Since(now))
+	fmt.Printf("BlockSize: "+strconv.Itoa(batch_size)+", Finish Key Encryption of "+strconv.Itoa(Data_Len)+" Individuals in (%s)\n", time.Since(now))
 
 	return
 }
 
 // Get the Ciphertext Data Segment for Calculation
-func GetCiphertextData(rsid int, eval *tfhe.BinaryEvaluator, batch_size int, Indiv []string) [][]Variant_TFHE {
+func GetCiphertextData(rsid int, eval *tfhe.BinaryEvaluator, batch_size int, Indiv []auxiliary.People) [][]Variant_TFHE {
 	Data_Len := len(Indiv)
 
 	now := time.Now()
@@ -365,7 +369,7 @@ func GetCiphertextData(rsid int, eval *tfhe.BinaryEvaluator, batch_size int, Ind
 	}
 
 	wg.Wait()
-	fmt.Printf("BatchSize: "+strconv.Itoa(batch_size)+", Get Ciphertext Data in (%s)\n", time.Since(now))
+	fmt.Printf("BlockSize: "+strconv.Itoa(batch_size)+", Get Ciphertext Data in (%s)\n", time.Since(now))
 	return Data
 }
 
@@ -464,11 +468,11 @@ func GetDistribute(rsid int, eval *tfhe.BinaryEvaluator, Dec_Data [][]Variant_TF
 }
 
 // query a rsid in ciphertext
-func QueryCiphertext(rsid int, segkey1, segkey2 [][]tfhe.LWECiphertext[uint32], eval *tfhe.BinaryEvaluator, batch_size int, Indiv []string) []BigValueCiphertext {
+func QueryCiphertext(rsid int, segkey1, segkey2 [][]tfhe.LWECiphertext[uint32], eval *tfhe.BinaryEvaluator, batch_size int, Indiv []auxiliary.People) []BigValueCiphertext {
 
 	Data_Len := len(Indiv)
 
-	fmt.Println("BatchSize: " + strconv.Itoa(batch_size) + ", Processing Query of " + strconv.Itoa(Data_Len) + " individuals...")
+	fmt.Println("BlockSize: " + strconv.Itoa(batch_size) + ", Processing Query of " + strconv.Itoa(Data_Len) + " individuals...")
 
 	Data := GetCiphertextData(rsid, eval, batch_size, Indiv)
 
@@ -508,7 +512,7 @@ func GetCodisDataCiphtertext(eval *tfhe.BinaryEvaluator, Data_Len int, batch_siz
 	}
 
 	wg.Wait()
-	fmt.Printf("BatchSize: "+strconv.Itoa(batch_size)+", Get Ciphertext Data in (%s)\n", time.Since(now))
+	fmt.Printf("BlockSize: "+strconv.Itoa(batch_size)+", Get Ciphertext Data in (%s)\n", time.Since(now))
 	return Data
 }
 
@@ -579,7 +583,7 @@ func CODIS_Set_Comparasion(Data_Len int, Dec_Data []CODIS_TFHE, eval *tfhe.Binar
 // query a person in ciphertext
 func SearchPerson(QueryCODIS CODIS_TFHE, segkey1, segkey2 [][]tfhe.LWECiphertext[uint32], eval *tfhe.BinaryEvaluator, Data_Len int, batch_size int) (res []tfhe.LWECiphertext[uint32]) {
 
-	fmt.Println("BatchSize: " + strconv.Itoa(batch_size) + ", Processing Person Searching in " + strconv.Itoa(Data_Len) + " individuals...")
+	fmt.Println("BlockSize: " + strconv.Itoa(batch_size) + ", Processing Person Searching in " + strconv.Itoa(Data_Len) + " individuals...")
 	Data := GetCodisDataCiphtertext(eval, Data_Len, batch_size)
 
 	Dec_Data := Data_Recover_CODIS(eval, Data_Len, Data, segkey1, segkey2)
@@ -591,10 +595,10 @@ func SearchPerson(QueryCODIS CODIS_TFHE, segkey1, segkey2 [][]tfhe.LWECiphertext
 }
 
 // A user can query his rsid
-func Userquery(user_name string, rsid int, segkey1, segkey2 []tfhe.LWECiphertext[uint32], batch_size int, eval *tfhe.BinaryEvaluator) (res [4]tfhe.LWECiphertext[uint32]) {
+func Userquery(people auxiliary.People, rsid int, segkey1, segkey2 []tfhe.LWECiphertext[uint32], batch_size int, eval *tfhe.BinaryEvaluator) (res [4]tfhe.LWECiphertext[uint32]) {
 
-	seg_ID := auxiliary.SegmentID(user_name, rsid, auxiliary.Seg_num)
-	Seg, _, _ := ReadSegmentData(user_name, seg_ID, batch_size)
+	seg_ID := auxiliary.SegmentID(people, rsid, auxiliary.Seg_num)
+	Seg, _, _ := ReadSegmentData(people, seg_ID, batch_size)
 
 	var QueryVariant Variant
 	QueryVariant.Rsid = Encode_rsID(rsid)
@@ -674,11 +678,11 @@ func GetMergedGenotype(rsid int, eval *tfhe.BinaryEvaluator, Dec_Data [][]Varian
 }
 
 // Perform a Boolean GWAS in ciphertext
-func GWASBool(rsid int, segkey1, segkey2 [][]tfhe.LWECiphertext[uint32], eval *tfhe.BinaryEvaluator, batch_size int, Indiv []string, phenotype []BigValueCiphertext) (Fix16, Int72Ciphertext) {
+func GWASBool(rsid int, segkey1, segkey2 [][]tfhe.LWECiphertext[uint32], eval *tfhe.BinaryEvaluator, batch_size int, Indiv []auxiliary.People, phenotype []BigValueCiphertext) (Fix16, Int72Ciphertext) {
 
 	Data_Len := len(Indiv)
 
-	fmt.Println("BatchSize: " + strconv.Itoa(batch_size) + ", Processing GWAS of " + strconv.Itoa(Data_Len) + " individuals...")
+	fmt.Println("BlockSize: " + strconv.Itoa(batch_size) + ", Processing GWAS of " + strconv.Itoa(Data_Len) + " individuals...")
 
 	Data := GetCiphertextData(rsid, eval, batch_size, Indiv)
 

@@ -13,18 +13,19 @@ import (
 const App_id_GWAS = auxiliary.Seg_num + 2
 
 // Whether s in set
-func Match(s string, set []string) bool {
+func Match(s string, set []auxiliary.People) int {
 	for _, ss := range set {
-		if s == ss {
-			return true
+		if s == ss.Name {
+			return ss.ID
 		}
 	}
-	return false
+	return -1
 }
 
-func ReadPhenotype(IndivLimit []string, Population string) ([]string, []int, []int, []int) {
+// Read the example phenotype in Hail
+func ReadPhenotype(IndivLimit []auxiliary.People, Population string) ([]auxiliary.People, []int, []int, []int) {
 
-	Individuals := []string{}
+	Individuals := []auxiliary.People{}
 	isFemale := []int{}
 	PurpleHair := []int{}
 	CaffeineConsumption := []int{}
@@ -44,7 +45,9 @@ func ReadPhenotype(IndivLimit []string, Population string) ([]string, []int, []i
 			continue
 		}
 
-		if !Match(fields[0], IndivLimit) {
+		match := Match(fields[0], IndivLimit)
+
+		if match == -1 {
 			continue
 		}
 
@@ -52,7 +55,10 @@ func ReadPhenotype(IndivLimit []string, Population string) ([]string, []int, []i
 			continue
 		}
 
-		Individuals = append(Individuals, fields[0])
+		var p auxiliary.People
+		p.Name = fields[0]
+		p.ID = match
+		Individuals = append(Individuals, p)
 		if fields[3] == "true" {
 			isFemale = append(isFemale, 1)
 		} else {

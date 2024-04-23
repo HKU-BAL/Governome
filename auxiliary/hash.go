@@ -191,11 +191,11 @@ func GenSHA3FromString(s string) []byte {
 }
 
 // Judge the ID of a segment of an individual from the input rsID
-func SegmentID(nickname string, rsid int, modulus int) int {
+func SegmentID(people People, rsid int, modulus int) int {
 	if modulus <= 1 {
 		log.Fatalf("Invalid modulus!")
 	}
-	fullinfo := nickname + strconv.Itoa(rsid)
+	fullinfo := people.Name + strconv.Itoa(rsid)
 	hashval_bytes := GenSHA3FromString(fullinfo)
 	hash_val := new(big.Int).SetBytes(hashval_bytes)
 	hash_mod := hash_val.Mod(hash_val, big.NewInt(int64(modulus)))

@@ -39,7 +39,7 @@ func QueryTrivium(Parameter tfhe.ParametersLiteral[uint32], rsid string, populat
 		}
 	} else {
 		pk := auxiliary.GenLWEPublicKey_tfheb(enc)
-		segkey1, segkey2 = trivium.GetSegKeyFromPK(pk, auxiliary.RsID_s2i(rsid), 1, Indiv[0:DataLen])
+		segkey1, segkey2 = trivium.GetSegKeyFromPK(pk, auxiliary.RsID_s2i(rsid), 1, Indiv)
 	}
 
 	if Verifysymbol {
@@ -68,7 +68,7 @@ func QueryTrivium(Parameter tfhe.ParametersLiteral[uint32], rsid string, populat
 		}
 	}
 
-	res := trivium.QueryCiphertext(auxiliary.RsID_s2i(rsid), segkey1, segkey2, eval, 1, Indiv[0:DataLen])
+	res := trivium.QueryCiphertext(auxiliary.RsID_s2i(rsid), segkey1, segkey2, eval, 1, Indiv)
 	count00 := trivium.BigValue2Int(trivium.Dec_BigValue(res[0], enc))
 	count01 := trivium.BigValue2Int(trivium.Dec_BigValue(res[1], enc))
 	count11 := trivium.BigValue2Int(trivium.Dec_BigValue(res[2], enc))

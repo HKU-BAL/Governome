@@ -1,16 +1,26 @@
 package auxiliary
 
 import (
-	"bufio"
 	"encoding/csv"
 	"fmt"
 	"io"
 	"log"
+	"math"
 	"math/big"
 	"os"
 	"path/filepath"
 	"strconv"
 )
+
+type People struct {
+	Name string
+	ID   int
+}
+
+// Get the subFolder Name
+func MappingPeopletoFolder(people People) string {
+	return strconv.Itoa(int(math.Floor(float64(people.ID)/100))*100) + "-" + strconv.Itoa(int(math.Floor(float64(people.ID)/100))*100+99)
+}
 
 // genotype string -> Int
 func Genotype_s2i(s string) int {
@@ -49,29 +59,37 @@ func RsID_i2s(val int) string {
 }
 
 // Read all Individual names
-func ReadIndividuals() []string {
-	Individuals := []string{}
-	path, _ := filepath.Abs("../../../Individuals/Individuals.txt")
+func ReadIndividuals() []People {
+	Individuals := make([]People, 0)
+	path, _ := filepath.Abs("../../../Individuals/Individuals.csv")
 	file, _ := os.Open(path)
 	defer file.Close()
 
-	br := bufio.NewReader(file)
+	r := csv.NewReader(file)
 	for {
-		a, _, c := br.ReadLine()
-		if c == io.EOF {
+		row, err := r.Read()
+		if err != nil && err != io.EOF {
+			log.Fatalf("can not read, err is %+v", err)
+		}
+		if err == io.EOF {
 			break
 		}
-		Individuals = append(Individuals, string(a))
+
+		var p People
+		p.Name = row[0]
+		p.ID, _ = strconv.Atoi(row[1])
+		Individuals = append(Individuals, p)
+
 	}
 	return Individuals
 }
 
 // Read All plaintext data
-func ReadPlaintext_data(Indivname string) ([]int, []int) {
+func ReadPlaintext_data(people People) ([]int, []int) {
 	rsID := []int{}
 	genotype := []int{}
 
-	path, _ := filepath.Abs("../../../Plaintext_Data/" + Indivname + ".csv")
+	path, _ := filepath.Abs("../../../Plaintext_Data/" + MappingPeopletoFolder(people) + "/" + people.Name + ".csv")
 	file, _ := os.Open(path)
 	defer file.Close()
 

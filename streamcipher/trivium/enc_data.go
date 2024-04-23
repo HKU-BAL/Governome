@@ -88,15 +88,15 @@ func (v *Variant) Decode2String() string {
 }
 
 // Divide the origin data of an individual into Segments
-func DivideIntoSegments(Indivname string) (Encoded_Variants [][]Variant) {
+func DivideIntoSegments(people auxiliary.People) (Encoded_Variants [][]Variant) {
 
-	RSIDs, GTs := auxiliary.ReadPlaintext_data(Indivname)
+	RSIDs, GTs := auxiliary.ReadPlaintext_data(people)
 	Encoded_Variants = make([][]Variant, auxiliary.Seg_num)
 	for i := 0; i < len(RSIDs); i++ {
 		var temp_variant Variant
 		temp_variant.Genotype = Encode_Genotype(GTs[i])
 		temp_variant.Rsid = Encode_rsID(RSIDs[i])
-		index := auxiliary.SegmentID(Indivname, RSIDs[i], auxiliary.Seg_num)
+		index := auxiliary.SegmentID(people, RSIDs[i], auxiliary.Seg_num)
 		Encoded_Variants[index] = append(Encoded_Variants[index], temp_variant)
 	}
 	return

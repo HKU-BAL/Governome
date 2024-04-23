@@ -244,7 +244,7 @@ func SaveR1CS(ccs constraint.ConstraintSystem, filepath string) {
 
 // Generate or Read R1CS circuit
 func GenorReadR1CS(circuit TriviumCircuit) (ccs constraint.ConstraintSystem) {
-	filepath := "../../../Snarks/R1CSTrivium/Trivium_circuit_BatchSize_" + strconv.Itoa(Batch_size_Trivium)
+	filepath := "../../../Snarks/R1CSTrivium/Trivium_circuit_BlockSize_" + strconv.Itoa(Batch_size_Trivium)
 	_, err := os.Stat(filepath)
 
 	if os.IsNotExist(err) {
@@ -270,7 +270,7 @@ func SaveSetupKeys(ProveKey groth16.ProvingKey, VerifyKey groth16.VerifyingKey, 
 		os.Mkdir("../../../Snarks/SetupTrivium/", os.ModePerm)
 		var buf bytes.Buffer
 		ProveKey.WriteRawTo(&buf)
-		os.WriteFile("../../../Snarks/SetupTrivium/pk_BatchSize_"+strconv.Itoa(Batch_size_Trivium), buf.Bytes(), 0644)
+		os.WriteFile("../../../Snarks/SetupTrivium/pk_BlockSize_"+strconv.Itoa(Batch_size_Trivium), buf.Bytes(), 0644)
 		fmt.Println("Proving Key Saved!")
 	}
 
@@ -278,15 +278,15 @@ func SaveSetupKeys(ProveKey groth16.ProvingKey, VerifyKey groth16.VerifyingKey, 
 		os.Mkdir("../../../Snarks/SetupTrivium/", os.ModePerm)
 		var buf bytes.Buffer
 		VerifyKey.WriteRawTo(&buf)
-		os.WriteFile("../../../Snarks/SetupTrivium/vk_BatchSize_"+strconv.Itoa(Batch_size_Trivium), buf.Bytes(), 0644)
+		os.WriteFile("../../../Snarks/SetupTrivium/vk_BlockSize_"+strconv.Itoa(Batch_size_Trivium), buf.Bytes(), 0644)
 		fmt.Println("Verifying Key Saved!")
 	}
 }
 
 // Generate or Read R1CS circuit
 func GenorReadSetup(r1cs constraint.ConstraintSystem) (ProveKey groth16.ProvingKey, VerifyKey groth16.VerifyingKey) {
-	filepathpk := "../../../Snarks/SetupTrivium/pk_BatchSize_" + strconv.Itoa(Batch_size_Trivium)
-	filepathvk := "../../../Snarks/SetupTrivium/vk_BatchSize_" + strconv.Itoa(Batch_size_Trivium)
+	filepathpk := "../../../Snarks/SetupTrivium/pk_BlockSize_" + strconv.Itoa(Batch_size_Trivium)
+	filepathvk := "../../../Snarks/SetupTrivium/vk_BlockSize_" + strconv.Itoa(Batch_size_Trivium)
 
 	_, errpk := os.Stat(filepathpk)
 	_, errvk := os.Stat(filepathvk)
@@ -314,47 +314,32 @@ func GenorReadSetup(r1cs constraint.ConstraintSystem) (ProveKey groth16.ProvingK
 }
 
 // Save Proof and publicWithness
-func SaveProofAndWitness(proof []groth16.Proof, publicWitness []witness.Witness, Indivname string, keyholder int, segID int) {
+func SaveProof(proof []groth16.Proof, people auxiliary.People, keyholder int, segID int) {
 	os.Mkdir("../../../Snarks/ProofTrivium/", os.ModePerm)
-	os.Mkdir("../../../Snarks/ProofTrivium/BatchSize_"+strconv.Itoa(Batch_size_Trivium), os.ModePerm)
-	os.Mkdir("../../../Snarks/ProofTrivium/BatchSize_"+strconv.Itoa(Batch_size_Trivium)+"/"+Indivname, os.ModePerm)
-	os.Mkdir("../../../Snarks/ProofTrivium/BatchSize_"+strconv.Itoa(Batch_size_Trivium)+"/"+Indivname+"/Keyholder_"+strconv.Itoa(keyholder), os.ModePerm)
-	os.Mkdir("../../../Snarks/ProofTrivium/BatchSize_"+strconv.Itoa(Batch_size_Trivium)+"/"+Indivname+"/Keyholder_"+strconv.Itoa(keyholder)+
-		"/SegID_"+strconv.Itoa(segID), os.ModePerm)
+	os.Mkdir("../../../Snarks/ProofTrivium/BlockSize_"+strconv.Itoa(Batch_size_Trivium), os.ModePerm)
+	os.Mkdir("../../../Snarks/ProofTrivium/BlockSize_"+strconv.Itoa(Batch_size_Trivium)+"/"+auxiliary.MappingPeopletoFolder(people), os.ModePerm)
+	os.Mkdir("../../../Snarks/ProofTrivium/BlockSize_"+strconv.Itoa(Batch_size_Trivium)+"/"+auxiliary.MappingPeopletoFolder(people)+"/"+people.Name, os.ModePerm)
+	os.Mkdir("../../../Snarks/ProofTrivium/BlockSize_"+strconv.Itoa(Batch_size_Trivium)+"/"+auxiliary.MappingPeopletoFolder(people)+"/"+people.Name+
+		"/Keyholder_"+strconv.Itoa(keyholder), os.ModePerm)
+	os.Mkdir("../../../Snarks/ProofTrivium/BlockSize_"+strconv.Itoa(Batch_size_Trivium)+"/"+auxiliary.MappingPeopletoFolder(people)+"/"+people.Name+
+		"/Keyholder_"+strconv.Itoa(keyholder)+"/SegID_"+strconv.Itoa(segID), os.ModePerm)
 	for k := 0; k < len(proof); k++ {
 		var buf bytes.Buffer
 		proof[k].WriteRawTo(&buf)
-
-		os.WriteFile("../../../Snarks/ProofTrivium/BatchSize_"+strconv.Itoa(Batch_size_Trivium)+"/"+Indivname+"/Keyholder_"+strconv.Itoa(keyholder)+
-			"/SegID_"+strconv.Itoa(segID)+"/BatchID_"+strconv.Itoa(k), buf.Bytes(), 0644)
-	}
-
-	os.Mkdir("../../../Snarks/WitnessTrivium/", os.ModePerm)
-	os.Mkdir("../../../Snarks/WitnessTrivium/BatchSize_"+strconv.Itoa(Batch_size_Trivium), os.ModePerm)
-	os.Mkdir("../../../Snarks/WitnessTrivium/BatchSize_"+strconv.Itoa(Batch_size_Trivium)+"/"+Indivname, os.ModePerm)
-	os.Mkdir("../../../Snarks/WitnessTrivium/BatchSize_"+strconv.Itoa(Batch_size_Trivium)+"/"+Indivname+"/Keyholder_"+strconv.Itoa(keyholder), os.ModePerm)
-	os.Mkdir("../../../Snarks/WitnessTrivium/BatchSize_"+strconv.Itoa(Batch_size_Trivium)+"/"+Indivname+"/Keyholder_"+strconv.Itoa(keyholder)+
-		"/SegID_"+strconv.Itoa(segID), os.ModePerm)
-	for k := 0; k < len(publicWitness); k++ {
-		var buf bytes.Buffer
-		publicWitness[k].WriteTo(&buf)
-
-		os.WriteFile("../../../Snarks/WitnessTrivium/BatchSize_"+strconv.Itoa(Batch_size_Trivium)+"/"+Indivname+"/Keyholder_"+strconv.Itoa(keyholder)+
-			"/SegID_"+strconv.Itoa(segID)+"/BatchID_"+strconv.Itoa(k), buf.Bytes(), 0644)
+		os.WriteFile("../../../Snarks/ProofTrivium/BlockSize_"+strconv.Itoa(Batch_size_Trivium)+"/"+auxiliary.MappingPeopletoFolder(people)+"/"+
+			people.Name+"/Keyholder_"+strconv.Itoa(keyholder)+"/SegID_"+strconv.Itoa(segID)+"/BlockID_"+strconv.Itoa(k), buf.Bytes(), 0644)
 	}
 }
 
 // Read Proofs
-func ReadProof(Indivname string, keyholder int, segID int, batchsize int) (proof []groth16.Proof) {
+func ReadProof(people auxiliary.People, keyholder int, segID int, batchsize int) (proof []groth16.Proof) {
 	size := int(math.Ceil(80 / float64(batchsize)))
 	proof = make([]groth16.Proof, size)
-	// publicWitness = make([]witness.Witness, size)
-	// var circuit TriviumCircuit
 
 	for k := 0; k < size; k++ {
 
-		filepath := "../../../Snarks/ProofTrivium/BatchSize_" + strconv.Itoa(Batch_size_Trivium) + "/" + Indivname + "/Keyholder_" + strconv.Itoa(keyholder) +
-			"/SegID_" + strconv.Itoa(segID) + "/BatchID_" + strconv.Itoa(k)
+		filepath := "../../../Snarks/ProofTrivium/BlockSize_" + strconv.Itoa(Batch_size_Trivium) + "/" + auxiliary.MappingPeopletoFolder(people) + "/" +
+			people.Name + "/Keyholder_" + strconv.Itoa(keyholder) + "/SegID_" + strconv.Itoa(segID) + "/BlockID_" + strconv.Itoa(k)
 		_, err := os.Stat(filepath)
 
 		if os.IsNotExist(err) {
@@ -368,55 +353,38 @@ func ReadProof(Indivname string, keyholder int, segID int, batchsize int) (proof
 		}
 	}
 
-	// for k := 0; k < size; k++ {
-
-	// 	filepath := "../../../Snarks/WitnessTrivium/BatchSize_" + strconv.Itoa(Batch_size_Trivium) + "/" + Indivname + "/Keyholder_" + strconv.Itoa(keyholder) +
-	// 		"/SegID_" + strconv.Itoa(segID) + "/BatchID_" + strconv.Itoa(k)
-	// 	_, err := os.Stat(filepath)
-
-	// 	if os.IsNotExist(err) {
-	// 		log.Fatalf("Read failed, err is %+v", err)
-	// 	} else {
-	// 		var buf bytes.Buffer
-	// 		data, _ := os.ReadFile(filepath)
-	// 		buf.Write(data)
-
-	// 		// temp, _ := frontend.NewWitness(&circuit, ecc.BN254.ScalarField())
-	// 		// publicWitness[k], _ = temp.Public()
-	// 		// publicWitness[k], _ = frontend.NewWitness(&circuit, ecc.BN254.ScalarField())
-	// 		publicWitness[k].ReadFrom(&buf)
-	// 	}
-	// }
 	return
 }
 
 // Save the segkey with the proof
-func SaveSegkey(segkey []tfhe.LWECiphertext[uint32], Indivname string, keyholder int, segID int) {
+func SaveSegkey(segkey []tfhe.LWECiphertext[uint32], people auxiliary.People, keyholder int, segID int) {
 	os.Mkdir("../../../Snarks/SegKey/", os.ModePerm)
-	os.Mkdir("../../../Snarks/SegKey/BatchSize_"+strconv.Itoa(Batch_size_Trivium), os.ModePerm)
-	os.Mkdir("../../../Snarks/SegKey/BatchSize_"+strconv.Itoa(Batch_size_Trivium)+"/"+Indivname, os.ModePerm)
-	os.Mkdir("../../../Snarks/SegKey/BatchSize_"+strconv.Itoa(Batch_size_Trivium)+"/"+Indivname+"/Keyholder_"+strconv.Itoa(keyholder), os.ModePerm)
-	os.Mkdir("../../../Snarks/SegKey/BatchSize_"+strconv.Itoa(Batch_size_Trivium)+"/"+Indivname+"/Keyholder_"+strconv.Itoa(keyholder)+
-		"/SegID_"+strconv.Itoa(segID), os.ModePerm)
+	os.Mkdir("../../../Snarks/SegKey/BlockSize_"+strconv.Itoa(Batch_size_Trivium), os.ModePerm)
+	os.Mkdir("../../../Snarks/SegKey/BlockSize_"+strconv.Itoa(Batch_size_Trivium)+"/"+auxiliary.MappingPeopletoFolder(people), os.ModePerm)
+	os.Mkdir("../../../Snarks/SegKey/BlockSize_"+strconv.Itoa(Batch_size_Trivium)+"/"+auxiliary.MappingPeopletoFolder(people)+"/"+people.Name, os.ModePerm)
+	os.Mkdir("../../../Snarks/SegKey/BlockSize_"+strconv.Itoa(Batch_size_Trivium)+"/"+auxiliary.MappingPeopletoFolder(people)+"/"+people.Name+
+		"/Keyholder_"+strconv.Itoa(keyholder), os.ModePerm)
+	os.Mkdir("../../../Snarks/SegKey/BlockSize_"+strconv.Itoa(Batch_size_Trivium)+"/"+auxiliary.MappingPeopletoFolder(people)+"/"+people.Name+
+		"/Keyholder_"+strconv.Itoa(keyholder)+"/SegID_"+strconv.Itoa(segID), os.ModePerm)
 	for k := 0; k < len(segkey); k++ {
 		var buf bytes.Buffer
 		segkey[k].WriteTo(&buf)
 
-		os.WriteFile("../../../Snarks/SegKey/BatchSize_"+strconv.Itoa(Batch_size_Trivium)+"/"+Indivname+"/Keyholder_"+strconv.Itoa(keyholder)+
-			"/SegID_"+strconv.Itoa(segID)+"/BatchID_"+strconv.Itoa(k), buf.Bytes(), 0644)
+		os.WriteFile("../../../Snarks/SegKey/BlockSize_"+strconv.Itoa(Batch_size_Trivium)+"/"+auxiliary.MappingPeopletoFolder(people)+"/"+people.Name+
+			"/Keyholder_"+strconv.Itoa(keyholder)+"/SegID_"+strconv.Itoa(segID)+"/BlockID_"+strconv.Itoa(k), buf.Bytes(), 0644)
 	}
 
 }
 
 // Read Segkey Ciphertext from file
-func ReadSegKey(Indivname string, keyholder int, segID int, batchsize int, params tfhe.Parameters[uint32]) (segkey []tfhe.LWECiphertext[uint32]) {
+func ReadSegKey(people auxiliary.People, keyholder int, segID int, batchsize int, params tfhe.Parameters[uint32]) (segkey []tfhe.LWECiphertext[uint32]) {
 	size := int(math.Ceil(80 / float64(batchsize)))
 	segkey = make([]tfhe.LWECiphertext[uint32], 80)
 
 	for k := 0; k < size; k++ {
 
-		filepath := "../../../Snarks/SegKey/BatchSize_" + strconv.Itoa(Batch_size_Trivium) + "/" + Indivname + "/Keyholder_" + strconv.Itoa(keyholder) +
-			"/SegID_" + strconv.Itoa(segID) + "/BatchID_" + strconv.Itoa(k)
+		filepath := "../../../Snarks/SegKey/BlockSize_" + strconv.Itoa(Batch_size_Trivium) + "/" + auxiliary.MappingPeopletoFolder(people) + "/" + people.Name +
+			"/Keyholder_" + strconv.Itoa(keyholder) + "/SegID_" + strconv.Itoa(segID) + "/BlockID_" + strconv.Itoa(k)
 		_, err := os.Stat(filepath)
 
 		if os.IsNotExist(err) {
@@ -437,11 +405,11 @@ func ReadSegKey(Indivname string, keyholder int, segID int, batchsize int, param
 	return
 }
 
-func UserProof(WhetherSave bool, Indivname string, keyholder int, segID int) {
+func UserProof(WhetherSave bool, people auxiliary.People, keyholder int, segID int) {
 	var circuit TriviumCircuit
-	r1cspath := "../../../Snarks/R1CSTrivium/Trivium_circuit_BatchSize_" + strconv.Itoa(Batch_size_Trivium)
-	pkpath := "../../../Snarks/SetupTrivium/pk_BatchSize_" + strconv.Itoa(Batch_size_Trivium)
-	vkpath := "../../../Snarks/SetupTrivium/vk_BatchSize_" + strconv.Itoa(Batch_size_Trivium)
+	r1cspath := "../../../Snarks/R1CSTrivium/Trivium_circuit_BlockSize_" + strconv.Itoa(Batch_size_Trivium)
+	pkpath := "../../../Snarks/SetupTrivium/pk_BlockSize_" + strconv.Itoa(Batch_size_Trivium)
+	vkpath := "../../../Snarks/SetupTrivium/vk_BlockSize_" + strconv.Itoa(Batch_size_Trivium)
 
 	ccs := GenorReadR1CS(circuit)
 
@@ -455,13 +423,13 @@ func UserProof(WhetherSave bool, Indivname string, keyholder int, segID int) {
 		SaveSetupKeys(ProveKey, VerifyKey, pkpath, vkpath)
 	}
 
-	keyinfo, _ := trivium.GenerateRawKey(Indivname, keyholder)
+	keyinfo, _ := trivium.GenerateRawKey(people, keyholder)
 
 	segkey, proof, publicWitness := EncStreamWithPublicKeyWithProveTFHE_Trivium(keyinfo, segID, &ccs, ProveKey)
 
 	if WhetherSave {
-		SaveProofAndWitness(proof, publicWitness, Indivname, keyholder, segID)
-		SaveSegkey(segkey, Indivname, keyholder, segID)
+		SaveProof(proof, people, keyholder, segID)
+		SaveSegkey(segkey, people, keyholder, segID)
 	}
 
 	if !WhetherSave {
