@@ -9,7 +9,7 @@ import (
 )
 
 var ParamsToyBoolean = tfhe.ParametersLiteral[uint32]{
-	LWEDimension:    3,
+	LWEDimension:    4,
 	GLWEDimension:   2,
 	PolyDegree:      8,
 	PolyLargeDegree: 8,

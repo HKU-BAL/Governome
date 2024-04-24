@@ -1,0 +1,426 @@
+class MyComplex:
+    def __init__(self, real_part, imag_part):
+        self.real = sfix(real_part)
+        self.imag = sfix(imag_part)
+
+    def neg(self):
+        return MyComplex(-self.real, -self.imag)
+
+    def add(self, other):
+        real_sum = self.real + other.real
+        imag_sum = self.imag + other.imag
+        return MyComplex(real_sum, imag_sum)
+    
+    def sub(self, other):
+        real_sum = self.real - other.real
+        imag_sum = self.imag - other.imag
+        return MyComplex(real_sum, imag_sum)
+
+    def mul(self, other):
+        real_product = self.real * other.real - self.imag * other.imag
+        imag_product = self.real * other.imag + self.imag * other.real
+        return MyComplex(real_product, imag_product)
+    
+
+lwe_len = 4
+glwe_len = 2
+level = glwe_len + 1
+poly_deg = 8
+half_poly_deg = 4
+qua_poly_deg = 2
+kskdim = poly_deg * glwe_len - lwe_len
+new_len = poly_deg * (glwe_len + 1)
+ksklevel = 8
+dom = 32
+bits = 22
+mask = 1 << 22
+large_sk_len = poly_deg * glwe_len
+vali = (glwe_len+1) * level * new_len
+valj = level * new_len
+kski = ksklevel * (lwe_len + 1)
+maxuint32 = (1 << 32) - 1
+sigma = 197.91374703826898
+mul_val = [33554432, 262144, 2048]
+level = glwe_len + 1
+glwe_stddev = 9.313225746154785e-10
+ScaledBaseLog = [30, 28, 26, 24, 22, 20, 18, 16]
+
+program.use_edabit(True)
+sfix.set_precision(dom)
+si = sbitint.get_type(dom)
+
+wNj = [0+0j, 1-0j, 1-0j, 6.123233995736757e-17-1j]
+w2Nj = [1+0j, 0.9238795325112867+0.3826834323650898j, 0.7071067811865476+0.7071067811865475j, 0.38268343236508984+0.9238795325112867j]
+wNjInv = [1+0j, 6.123233995736757e-17+1j, 1+0j, 0+0j]
+w2NjInv = [0.25-0j, 0.23096988312782168-0.09567085809127245j, 0.1767766952966369-0.17677669529663687j, 0.09567085809127246-0.23096988312782168j]
+
+wNj_real = Array(half_poly_deg, sfix)
+wNj_imag = Array(half_poly_deg, sfix)
+
+w2Nj_real = Array(half_poly_deg, sfix)
+w2Nj_imag = Array(half_poly_deg, sfix)
+
+wNjInv_real = Array(half_poly_deg, sfix)
+wNjInv_imag = Array(half_poly_deg, sfix)
+
+w2NjInv_real = Array(half_poly_deg, sfix)
+w2NjInv_imag = Array(half_poly_deg, sfix)
+
+def mulval(id):
+    pow = ((glwe_len - id) * 7) + 11
+    return 1 << pow
+
+def InitW():
+    for i in range(half_poly_deg):
+        wNj_real[i] = wNj[i].real
+        wNj_imag[i] = wNj[i].imag
+
+        w2Nj_real[i] = w2Nj[i].real
+        w2Nj_imag[i] = w2Nj[i].imag
+
+        wNjInv_real[i] = wNjInv[i].real
+        wNjInv_imag[i] = wNjInv[i].imag
+
+        w2NjInv_real[i] = w2NjInv[i].real
+        w2NjInv_imag[i] = w2NjInv[i].imag
+
+def testcomplex(c):
+    realpart = c.real.reveal()
+    imagpart = c.imag.reveal()
+    print_ln('got %s + %si', realpart, imagpart)
+
+def testArray(actual):
+    print_ln('Results: %s', [actual[i].reveal() for i in range(len(actual))])
+
+def testValue(actual):
+    actual = actual.reveal()
+    print_ln('got %s', actual)
+
+def guassian(_mu, _sigma):
+    res = 0
+    for i in range(12):
+        a = sfix.get_random(0, 1)
+        res = res + a
+    res = res - 6
+    res = _mu + res * _sigma
+    val = sint(res)
+    return val
+
+def sample_guassian(_mu, _sigma, _length):
+    res = Matrix(_length, 1, si)
+    @for_range_opt(_length)
+    def _(i):
+        res[i][0] = si(guassian(_mu, _sigma))
+    return res
+
+def gensk(_length):
+    _sk = Array(_length, sint)
+    @for_range_opt(_length)
+    def _(i):
+        _sk[i] = sint.get_random_int(1)
+    return _sk
+
+def genpk(_sk):
+    lwe_sk = Matrix(lwe_len, 1, si)
+    e = sample_guassian(0, sigma, lwe_len)
+    b = Matrix(lwe_len, 1, si)
+    for i in range(lwe_len):
+        lwe_sk[i] = _sk[i]
+    
+    A = Matrix(lwe_len, lwe_len, si)
+    @for_range_opt(lwe_len)
+    def _(i):
+        for j in range(lwe_len):
+            A[i][j] = si(sint.get_random_int(dom))
+
+    b = A * lwe_sk + e
+
+    return A, b
+
+def fourierarray(a):
+    res_real = Array(half_poly_deg, sfix)
+    res_imag = Array(half_poly_deg, sfix)
+
+    @for_range_opt(half_poly_deg)
+    def _(i):
+        res_real[i] = a[i]
+        res_imag[i] = a[i + half_poly_deg]
+
+    @for_range_opt(half_poly_deg)
+    def _(i):
+        val = MyComplex(res_real[i], res_imag[i]).mul(MyComplex(w2Nj_real[i], w2Nj_imag[i]))
+        res_real[i] = val.real
+        res_imag[i] = val.imag
+    return res_real, res_imag
+
+def fft(a_real, a_imag):
+    N = half_poly_deg
+    half_N = qua_poly_deg
+    res_real = Array(half_poly_deg, sfix)
+    res_imag = Array(half_poly_deg, sfix)
+
+    @for_range_opt(half_N)
+    def _(j):
+        U = MyComplex(a_real[j], a_imag[j])
+        V = MyComplex(a_real[j+half_N], a_imag[j+half_N])
+        val_a, val_b = U.add(V), U.sub(V)
+        res_real[j] = val_a.real
+        res_imag[j] = val_a.imag
+        res_real[j+half_N] = val_b.real
+        res_imag[j+half_N] = val_b.imag
+
+    t = half_N
+    m = 2
+    while m < N:
+        t = t>>1
+        @for_range_opt(m)
+        def _(i):
+            j1 = i * t << 1
+            j2 = j1 + t
+            @for_range_opt(j1, j2)
+            def _(j):
+                U = MyComplex(res_real[j], res_imag[j])
+                V = MyComplex(res_real[j+t], res_imag[j+t]).mul(MyComplex(wNj_real[m+i], wNj_imag[m+i]))
+                val_a, val_b = U.add(V), U.sub(V)
+                res_real[j] = val_a.real
+                res_imag[j] = val_a.imag
+                res_real[j+t] = val_b.real
+                res_imag[j+t] = val_b.imag
+        m = m<<1
+    return res_real, res_imag
+
+def ToFourierPoly(a):
+    b,c = fourierarray(a)
+    return fft(b, c)
+
+def ifft(a_real, a_imag):
+    N = half_poly_deg
+    half_N = qua_poly_deg
+    res_real = Array(half_poly_deg, sfix)
+    res_imag = Array(half_poly_deg, sfix)
+    @for_range_opt(half_poly_deg)
+    def _(j):
+        res_real[j] = a_real[j]
+        res_imag[j] = a_imag[j]
+    t = 1
+    k = 0
+    m = N
+    
+    while m > 2:
+        h = m >> 1
+        @for_range_opt(h)
+        def _(i):
+            j1 = i * t << 1
+            j2 = j1 + t
+            @for_range_opt(j1, j2)
+            def _(j):
+                U = MyComplex(res_real[j], res_imag[j])
+                V = MyComplex(res_real[j+t], res_imag[j+t])
+                val_a, val_b = U.add(V), (U.sub(V)).mul(MyComplex(wNjInv_real[k+i], wNjInv_imag[k+i]))
+                res_real[j] = val_a.real
+                res_imag[j] = val_a.imag
+                res_real[j+t] = val_b.real
+                res_imag[j+t] = val_b.imag
+        t = t<<1
+        k += h
+        m = m >> 1
+    
+    @for_range_opt(half_N)
+    def _(j):
+        U = MyComplex(res_real[j], res_imag[j])
+        V = MyComplex(res_real[j+qua_poly_deg], res_imag[j+qua_poly_deg])
+        val_a, val_b = U.add(V), U.sub(V)
+        res_real[j] = val_a.real
+        res_imag[j] = val_a.imag
+        res_real[j+qua_poly_deg] = val_b.real
+        res_imag[j+qua_poly_deg] = val_b.imag
+
+    return res_real, res_imag
+
+def ifourierarray(a_real, a_imag):
+    res = Array(poly_deg, sint)
+    
+    @for_range_opt(half_poly_deg)
+    def _(i):
+        val = MyComplex(a_real[i], a_imag[i]).mul(MyComplex(w2NjInv_real[i], w2NjInv_imag[i]))
+        res[i] = sint(val.real)
+        res[i+half_poly_deg] = sint(val.imag)
+    return res
+
+def ToStandardPoly(a, b):
+    c, d = ifft(a, b)
+    res = ifourierarray(c, d)
+    return res
+
+def GenFourierKey(_sk):
+    res_real = Array(half_poly_deg * glwe_len, sfix)
+    res_imag = Array(half_poly_deg * glwe_len, sfix)
+    for i in range(glwe_len):
+        subsk = Array(poly_deg, sint)
+        @for_range_opt(poly_deg)
+        def _(j):
+            subsk[j] = _sk[poly_deg * i + j]
+        
+        newpoly_real, newpoly_imag = ToFourierPoly(subsk)
+
+        @for_range_opt(half_poly_deg)
+        def _(j):
+            res_real[i * half_poly_deg + j] = newpoly_real[j]
+            res_imag[i * half_poly_deg + j] = newpoly_imag[j]
+    return res_real, res_imag
+
+def mulFourierGLWEKey(a, b_real, b_imag):
+    res = Array(poly_deg, sint)
+    temp = Array(poly_deg, sint)
+
+    @for_range_opt(poly_deg)
+    def _(i):
+        temp[i] = sint(a[i])%mask
+    
+    new_temp_real, new_temp_imag = ToFourierPoly(temp)
+
+    @for_range_opt(half_poly_deg)
+    def _(i):
+        val = MyComplex(new_temp_real[i], new_temp_imag[i]).mul(MyComplex(b_real[i], b_imag[i]))
+        new_temp_real[i], new_temp_imag[i] = val.real, val.imag
+    temp = ToStandardPoly(new_temp_real, new_temp_imag)
+    
+    @for_range_opt(poly_deg)
+    def _(i):
+        res[i] = temp[i]
+        temp[i] = sint(sint(a[i]) >> bits)%mask
+
+    new_temp_real, new_temp_imag = ToFourierPoly(temp)
+    
+    @for_range_opt(half_poly_deg)
+    def _(i):
+        val = MyComplex(new_temp_real[i], new_temp_imag[i]).mul(MyComplex(b_real[i], b_imag[i]))
+        new_temp_real[i], new_temp_imag[i] = val.real, val.imag
+    temp = ToStandardPoly(new_temp_real, new_temp_imag)
+
+    @for_range_opt(poly_deg)
+    def _(i):
+        res[i] = res[i] + (temp[i] * mask)
+    
+    if dom < 2 * bits:
+        return res
+    
+
+    @for_range_opt(poly_deg)
+    def _(i):
+        temp[i] = sint(sint(a[i] / mask) / mask)%mask
+    
+    new_temp_real, new_temp_imag = ToFourierPoly(temp)
+    @for_range_opt(half_poly_deg)
+    def _(i):
+        val = MyComplex(new_temp_real[i], new_temp_imag[i]).mul(MyComplex(b_real[i], b_imag[i]))
+        new_temp_real[i], new_temp_imag[i] = val.real, val.imag
+    temp = ToStandardPoly(new_temp_real, new_temp_imag)
+
+    @for_range_opt(poly_deg)
+    def _(i):
+        res[i] = res[i] + sint(temp[i] * mask * mask)
+    return res
+
+
+def genbsk(_sk):
+    fsk_real, fsk_imag = GenFourierKey(_sk)
+    res = Array(lwe_len * (glwe_len+1) * level * new_len, sint)
+    for i in range(lwe_len):
+        temp = Array(poly_deg, sint)
+        for j in range(glwe_len+1):           
+            if j == 0:
+                temp[0] = _sk[i]
+            else:
+                @for_range_opt(poly_deg)
+                def _(l):
+                    temp[l] = _sk[(j-1)*poly_deg+l] * _sk[i]
+            for k in range(level):
+                res_set = Array(new_len, sint)
+                sca_pt = Array(poly_deg, sint)
+                
+                @for_range_opt(poly_deg)
+                def _(l):
+                    sca_pt[l] = temp[l] * mulval(k)
+                
+                sim = i*vali + j*valj+ k*new_len
+
+                @for_range_opt(poly_deg)
+                def _(ll):
+                    res_set[ll] = sca_pt[ll] + guassian(0, glwe_stddev)
+                
+                @for_range_opt(poly_deg, new_len)
+                def _(ll):    
+                    res_set[ll] = sint.get_random_int(dom)
+
+                @for_range_opt(glwe_len)
+                def _(gl):              
+                    real_set = Array(half_poly_deg, sfix)
+                    imag_set = Array(half_poly_deg, sfix)
+
+                    @for_range_opt(half_poly_deg)
+                    def _(u):
+                        real_set[u] = fsk_real[(gl*half_poly_deg)+u]
+                        imag_set[u] = fsk_imag[(gl*half_poly_deg)+u]
+                    
+                    subres = Array(poly_deg, sint)
+
+                    @for_range_opt(poly_deg)
+                    def _(lll):
+                        subres[lll] = res_set[(gl+1)*poly_deg + lll]
+
+                    temp_f = mulFourierGLWEKey(subres, real_set, imag_set)
+
+                    @for_range_opt(poly_deg)
+                    def _(lll):
+                        res_set[lll] -= temp_f[lll]
+                
+                @for_range_opt(new_len)
+                def _(u):
+                    res[u + sim] = res_set[u]
+
+    return res
+
+def genksk(_sk):
+    skIn = _sk[lwe_len:]
+    lwe_sk = _sk[0:lwe_len]
+    res = Array(kskdim * ksklevel * (lwe_len + 1), sint)
+
+    for i in range(kskdim):
+        for j in range(ksklevel):
+            id = i * kski + j * (lwe_len + 1)
+            res[id] = skIn[i] * sint(1 << ScaledBaseLog[j]) + guassian(0, sigma)
+            for k in range(lwe_len):               
+                res[id + k + 1] = sint.get_random_int(dom)
+                res[id] = res[id] - res[id + k + 1] * lwe_sk[k]
+    return res
+
+
+InitW()
+
+sk = gensk(large_sk_len)
+testArray(sk)
+
+
+
+fsk1, fsk2 = GenFourierKey(sk)
+testArray(fsk1)
+testArray(fsk2)
+
+bsk = genbsk(sk)
+testArray(bsk)
+
+
+ksk = genksk(sk)
+testArray(ksk)
+A, b = genpk(sk)
+
+
+@for_range_opt(lwe_len)
+def _(i):
+    testArray(A[i])
+
+testArray(b)
+
+
+
