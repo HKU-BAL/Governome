@@ -33,7 +33,7 @@ func GenSegmentKey(keyinfo []byte, segmentID int, batch_size int) []int {
 
 	batchnum := int(math.Ceil(80 / float64(batch_size)))
 
-	// In each batch, we get batch_size bits by mimc(keyinfo | segID * 80 + batchID + 1)
+	// In each batch, we get batch_size bits by mimc(keyinfo, segID * 80 + batchID + 1)
 	key := make([]int, 80)
 	for k := 0; k < batchnum; k++ {
 		testval := segmentID*80 + k + 1
@@ -50,6 +50,75 @@ func GenSegmentKey(keyinfo []byte, segmentID int, batch_size int) []int {
 	}
 
 	return key
+}
+
+// In hosted mode, every segment share a same key, but the iv is different
+func GenKeyHostedMode(keyinfo []byte, batch_size int) []int {
+	length := ((len(keyinfo)-1)/auxiliary.Mimchashcurve.Size() + 1) * auxiliary.Mimchashcurve.Size()
+	keyinfo = auxiliary.PadBytes(keyinfo, length)
+	batchnum := int(math.Ceil(80 / float64(batch_size)))
+
+	// In each batch, we get batch_size bits by mimc(keyinfo, batchID + 1)
+	key := make([]int, 80)
+	for k := 0; k < batchnum; k++ {
+		testval := k + 1
+		temp := big.NewInt(int64(testval)).Bytes()
+		temp = auxiliary.PadBytes(temp, auxiliary.Mimchashcurve.Size())
+		temp = append(keyinfo, temp...)
+		subhash, _ := auxiliary.MimcHashRaw(temp, auxiliary.Mimchashcurve)
+		hashval := big.NewInt(1).SetBytes(subhash)
+		for i := 0; i < batch_size && k*batch_size+i < 80; i++ {
+			bigk := big.NewInt(1).And(big.NewInt(1), hashval)
+			key[k*batch_size+i] = int(bigk.Uint64())
+			hashval = big.NewInt(1).Rsh(hashval, 1)
+		}
+	}
+
+	return key
+}
+
+// Generate Hosted key for zk-snarks
+func GenKeyHostedModeWithQuo(keyinfo []byte, batch_size int) ([]int, []*big.Int) {
+	length := ((len(keyinfo)-1)/auxiliary.Mimchashcurve.Size() + 1) * auxiliary.Mimchashcurve.Size()
+	keyinfo = auxiliary.PadBytes(keyinfo, length)
+
+	batchnum := int(math.Ceil(80 / float64(batch_size)))
+
+	// In each batch, we get batch_size bits by mimc(keyinfo, batchID + 1)
+	key := make([]int, 80)
+	res := make([]*big.Int, batchnum)
+	for k := 0; k < batchnum; k++ {
+		testval := k + 1
+		temp := big.NewInt(int64(testval)).Bytes()
+		temp = auxiliary.PadBytes(temp, auxiliary.Mimchashcurve.Size())
+		temp = append(keyinfo, temp...)
+		subhash, _ := auxiliary.MimcHashRaw(temp, auxiliary.Mimchashcurve)
+		hashval := big.NewInt(1).SetBytes(subhash)
+		for i := 0; i < batch_size && k*batch_size+i < 80; i++ {
+			bigk := big.NewInt(1).And(big.NewInt(1), hashval)
+			key[k*batch_size+i] = int(bigk.Uint64())
+			hashval = big.NewInt(1).Rsh(hashval, 1)
+		}
+		res[k] = hashval
+	}
+
+	return key, res
+}
+
+// In hosted mode, every segment share a same key, but the iv is different, based on the segmentID
+func GenIVHostedMode(segmentID int) []int {
+	iv := make([]int, 80)
+
+	temp := big.NewInt(int64(segmentID)).Bytes()
+	temp = auxiliary.PadBytes(temp, auxiliary.Mimchashcurve.Size())
+	subhash, _ := auxiliary.MimcHashRaw(temp, auxiliary.Mimchashcurve)
+	hashval := big.NewInt(1).SetBytes(subhash)
+	for i := 0; i < 80; i++ {
+		bigk := big.NewInt(1).And(big.NewInt(1), hashval)
+		iv[i] = int(bigk.Uint64())
+		hashval = big.NewInt(1).Rsh(hashval, 1)
+	}
+	return iv
 }
 
 // Generate Segment key for zk-snarks

@@ -11,10 +11,11 @@ import (
 	"strconv"
 
 	"github.com/consensys/gnark/backend/groth16"
+	"github.com/consensys/gnark/backend/witness"
 	"github.com/sp301415/tfhe-go/tfhe"
 )
 
-func GWAS(Parameter tfhe.ParametersLiteral[uint32], rsid string, population string, Readsymbol bool, Verifysymbol bool) {
+func GWAS(Parameter tfhe.ParametersLiteral[uint32], rsid string, population string, Readsymbol bool, Verifysymbol bool, option bool) {
 	params := Parameter.Compile()
 
 	enc := tfhe.NewBinaryEncryptor(params)
@@ -45,25 +46,31 @@ func GWAS(Parameter tfhe.ParametersLiteral[uint32], rsid string, population stri
 	if Readsymbol {
 		for i := 0; i < DataLen; i++ {
 			segID := auxiliary.SegmentID(Indiv[i], auxiliary.RsID_s2i(rsid), auxiliary.Seg_num)
-			segkey1[i] = snarks.ReadSegKey(Indiv[i], 1, segID, 1, params)
-			segkey2[i] = snarks.ReadSegKey(Indiv[i], 2, segID, 1, params)
+			segkey1[i] = snarks.ReadSegKey(Indiv[i], 1, segID, 1, params, option)
+			segkey2[i] = snarks.ReadSegKey(Indiv[i], 2, segID, 1, params, option)
 		}
 	} else {
 		pk := auxiliary.GenLWEPublicKey_tfheb(enc)
-		segkey1, segkey2 = trivium.GetSegKeyFromPK(pk, auxiliary.RsID_s2i(rsid), 1, Indiv[0:DataLen])
+		segkey1, segkey2 = trivium.GetSegKeyFromPK(pk, auxiliary.RsID_s2i(rsid), 1, Indiv, option)
 	}
 
 	if Verifysymbol {
-		var circuit snarks.TriviumCircuit
-		ccs := snarks.GenorReadR1CS(circuit)
-		_, VerifyKey := snarks.GenorReadSetup(ccs)
+		ccs := snarks.GenorReadR1CS(false, option)
+		_, VerifyKey := snarks.GenorReadSetup(ccs, false, option)
 		for i := 0; i < DataLen; i++ {
 			segID := auxiliary.SegmentID(Indiv[i], auxiliary.RsID_s2i(rsid), auxiliary.Seg_num)
-			keyhash1, keyhash2 := trivium.ReadKeyhash(Indiv[i], 1)
-			proof1 := snarks.ReadProof(Indiv[i], 1, segID, 1)
-			publicWitness1 := snarks.ConstructpublicWitnessWithct(segID, keyhash1, segkey1[i])
-			proof2 := snarks.ReadProof(Indiv[i], 2, segID, 1)
-			publicWitness2 := snarks.ConstructpublicWitnessWithct(segID, keyhash2, segkey2[i])
+			keyhash1, keyhash2 := trivium.ReadKeyhash(Indiv[i], 1, option)
+			proof1 := snarks.ReadProof(Indiv[i], 1, segID, 1, option)
+			proof2 := snarks.ReadProof(Indiv[i], 2, segID, 1, option)
+			var publicWitness1, publicWitness2 []witness.Witness
+			if option {
+				publicWitness1 = snarks.ConstructpublicWitnessWithSegKeyHosted(keyhash1, segkey1[i])
+				publicWitness2 = snarks.ConstructpublicWitnessWithSegKeyHosted(keyhash2, segkey2[i])
+			} else {
+				publicWitness1 = snarks.ConstructpublicWitnessWithSegKeyDefault(segID, keyhash1, segkey1[i])
+				publicWitness2 = snarks.ConstructpublicWitnessWithSegKeyDefault(segID, keyhash2, segkey2[i])
+			}
+
 			for k := 0; k < len(proof1); k++ {
 				err := groth16.Verify(proof1[k], VerifyKey, publicWitness1[k])
 				if err != nil {
@@ -79,7 +86,7 @@ func GWAS(Parameter tfhe.ParametersLiteral[uint32], rsid string, population stri
 		}
 	}
 
-	bit_res, exp_res := trivium.GWASBool(auxiliary.RsID_s2i(rsid), segkey1, segkey2, eval, 1, Indiv, Phenotype_Ciphertext)
+	bit_res, exp_res := trivium.GWASBool(auxiliary.RsID_s2i(rsid), segkey1, segkey2, eval, 1, Indiv, Phenotype_Ciphertext, option)
 
 	val := trivium.DecDivResult(bit_res, exp_res, enc)
 	p := trivium.GWASResultToPValue(val, len(Indiv))
@@ -94,12 +101,13 @@ func main() {
 	toy := flag.Bool("Toy", true, "Whether using Toy Parameters")
 	readsymbol := flag.Bool("ReadKey", false, "Whether read Data from file, not suitable for toy params")
 	verifysymbol := flag.Bool("Verify", false, "Whether verifying the proofs")
+	Hosted := flag.Bool("Hosted", false, "Whether to use hosted mode")
 	flag.Parse()
 
 	if *toy {
-		GWAS(auxiliary.ParamsToyBoolean, *rsid, *population, *readsymbol, *verifysymbol)
+		GWAS(auxiliary.ParamsToyBoolean, *rsid, *population, *readsymbol, *verifysymbol, *Hosted)
 	} else {
-		GWAS(tfhe.ParamsBinaryOriginal, *rsid, *population, *readsymbol, *verifysymbol)
+		GWAS(tfhe.ParamsBinaryOriginal, *rsid, *population, *readsymbol, *verifysymbol, *Hosted)
 	}
 
 }

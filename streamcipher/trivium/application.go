@@ -171,14 +171,30 @@ func Decode_CODIS(cod []CODIS) []applications.CODIS {
 }
 
 // Encrypt the CODIS data
-func XOR_CODIS(cod CODIS, keyinfo1, keyinfo2 []byte, batch_size int) CODIS {
-	StreamKey1 := GenSegmentKey(keyinfo1, applications.App_id_SearchPerson, batch_size)
-	StreamKey2 := GenSegmentKey(keyinfo2, applications.App_id_SearchPerson, batch_size)
+func XOR_CODIS(cod CODIS, keyinfo1, keyinfo2 []byte, batch_size int, option bool) CODIS {
+
+	iv := make([]int, 80)
+	StreamKey1 := make([]int, 80)
+	StreamKey2 := make([]int, 80)
+
+	if option {
+		StreamKey1 = GenKeyHostedMode(keyinfo1, batch_size)
+		StreamKey2 = GenKeyHostedMode(keyinfo2, batch_size)
+	}
+
+	if !option {
+		StreamKey1 = GenSegmentKey(keyinfo1, applications.App_id_SearchPerson, batch_size)
+		StreamKey2 = GenSegmentKey(keyinfo2, applications.App_id_SearchPerson, batch_size)
+	}
+
+	if option {
+		iv = GenIVHostedMode(applications.App_id_SearchPerson)
+	}
+
 	StreamKey := make([]int, 80)
 	for i := 0; i < 80; i++ {
 		StreamKey[i] = StreamKey1[i] ^ StreamKey2[i]
 	}
-	iv := make([]int, 80)
 	var triv Trivium
 	triv.Init(StreamKey, iv)
 	var res CODIS
@@ -196,7 +212,7 @@ func XOR_CODIS(cod CODIS, keyinfo1, keyinfo2 []byte, batch_size int) CODIS {
 }
 
 // Encrypt the CODIS Data and Save it
-func EncAndSaveCODIS_Trivium(batch_size int) {
+func EncAndSaveCODIS_Trivium(batch_size int, option bool) {
 	now := time.Now()
 	data := applications.ReadCODISData()
 	cods := Encode_CODIS(data)
@@ -215,11 +231,15 @@ func EncAndSaveCODIS_Trivium(batch_size int) {
 		// fullhash2 := GenFullHashForApplicationLayer(keyinfo2, applications.App_id, batch_size)
 		// fullhashset1[i] = "Full Hash1: " + big.NewInt(1).SetBytes(fullhash1).String()
 		// fullhashset2[i] = "Full Hash2: " + big.NewInt(1).SetBytes(fullhash2).String()
-		enc_cods[i] = XOR_CODIS(cods[i], keyinfo1, keyinfo2, batch_size)
+		enc_cods[i] = XOR_CODIS(cods[i], keyinfo1, keyinfo2, batch_size, option)
 	}
 	new_data := Decode_CODIS(enc_cods)
 
-	file_name := "BlockSize_" + strconv.Itoa(batch_size) + ".csv"
+	file_name := "BlockSize_" + strconv.Itoa(batch_size)
+	if option {
+		file_name = file_name + "_Hosted"
+	}
+	file_name = file_name + ".csv"
 	os.Mkdir("../../../CODIS_Data/Trivium_Enc_CODIS_Data", os.ModePerm)
 	file_path := "../../../CODIS_Data/Trivium_Enc_CODIS_Data/" + file_name
 
@@ -246,11 +266,14 @@ func EncAndSaveCODIS_Trivium(batch_size int) {
 }
 
 // Read the Encrypted CODIS Data
-func ReadCODISData(batch_size int) (res []applications.CODIS, hash1, hash2 [][]byte) {
+func ReadCODISData(batch_size int, option bool) (res []applications.CODIS, hash1, hash2 [][]byte) {
 
 	Indivs := auxiliary.ReadIndividuals()
-
-	file_name := "BlockSize_" + strconv.Itoa(batch_size) + ".csv"
+	file_name := "BlockSize_" + strconv.Itoa(batch_size)
+	if option {
+		file_name = file_name + "_Hosted"
+	}
+	file_name = file_name + ".csv"
 	file_path := "../../../CODIS_Data/Trivium_Enc_CODIS_Data/" + file_name
 
 	path, _ := filepath.Abs(file_path)

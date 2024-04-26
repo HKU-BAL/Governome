@@ -17,11 +17,12 @@ func main() {
 	codisencsymbol := flag.Bool("CodisEnc", false, "Whether to encrypt the codis data")
 	keysymbol := flag.Bool("GenKey", false, "Whether to generate the keys")
 	batchsize := flag.Int("BlockSize", 1, "BlockSize for the keys for zk-snarks")
+	Hosted := flag.Bool("Hosted", false, "Whether to use hosted mode")
 
 	flag.Parse()
 
 	if *codissymbol {
-		applications.GenAndSaveData()
+		applications.GenAndSaveCODISData()
 	}
 
 	if *keysymbol {
@@ -32,10 +33,10 @@ func main() {
 		}
 	}
 	if *codisencsymbol {
-		trivium.EncAndSaveCODIS_Trivium(*batchsize)
+		trivium.EncAndSaveCODIS_Trivium(*batchsize, *Hosted)
 	}
 	if *segsymbol {
-		trivium.EncryptAndSaveData(*batchsize)
+		trivium.EncryptAndSaveData(*batchsize, *Hosted)
 	}
 
 }

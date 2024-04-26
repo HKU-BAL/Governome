@@ -1,6 +1,7 @@
 package trivium
 
 import (
+	"Governome/applications"
 	"Governome/auxiliary"
 	"bytes"
 	"encoding/csv"
@@ -21,7 +22,7 @@ import (
 )
 
 // Read plaintext data, encrypt it, then save it
-func EncryptAndSaveData(batch_size int) {
+func EncryptAndSaveData(batch_size int, option bool) {
 
 	now := time.Now()
 
@@ -34,7 +35,7 @@ func EncryptAndSaveData(batch_size int) {
 
 	subfoldernum := int(math.Ceil(float64(len(Indivs)) / 100))
 	for i := 0; i < subfoldernum; i++ {
-		os.Mkdir("../../../Segments_Enc_Data_Trivium/"+blockfolder+"/"+strconv.Itoa(i*100)+"-"+strconv.Itoa(min(len(Indivs), i*100+99)), os.ModePerm)
+		os.Mkdir("../../../Segments_Enc_Data_Trivium/"+blockfolder+"/"+strconv.Itoa(i*100)+"-"+strconv.Itoa(i*100+99), os.ModePerm)
 	}
 
 	numCores := runtime.NumCPU()
@@ -56,9 +57,13 @@ func EncryptAndSaveData(batch_size int) {
 			keyinfo1, keyhash1 := GenerateRawKey(Indivs[index], 1)
 			keyinfo2, keyhash2 := GenerateRawKey(Indivs[index], 2)
 
-			enc_data := Data_Enc(Encoded_Variants, keyinfo1, keyinfo2, batch_size)
+			enc_data := Data_Enc(Encoded_Variants, keyinfo1, keyinfo2, batch_size, option)
 			string_data := SegmentToStrings(enc_data, keyhash1, keyhash2, Indivs[index].Name)
-			file_name := Indivs[index].Name + "_Segments.csv"
+			file_name := Indivs[index].Name
+			if option {
+				file_name = file_name + "_Hosted"
+			}
+			file_name = file_name + "_Segments.csv"
 			file_path := "../../../Segments_Enc_Data_Trivium/" + blockfolder + "/" + auxiliary.MappingPeopletoFolder(Indivs[index]) + "/" + file_name
 			f, _ := os.Create(file_path)
 			w := csv.NewWriter(f)
@@ -80,9 +85,13 @@ func EncryptAndSaveData(batch_size int) {
 }
 
 // Read a ciphertext segment
-func ReadSegmentData(people auxiliary.People, segID int, batch_size int) (Variants []Variant, keyhash1, keyhash2 []byte) {
+func ReadSegmentData(people auxiliary.People, segID int, batch_size int, option bool) (Variants []Variant, keyhash1, keyhash2 []byte) {
 	subfolder := "BlockSize_" + strconv.Itoa(batch_size)
-	file_name := people.Name + "_Segments.csv"
+	file_name := people.Name
+	if option {
+		file_name = file_name + "_Hosted"
+	}
+	file_name = file_name + "_Segments.csv"
 	file_path := "../../../Segments_Enc_Data_Trivium/" + subfolder + "/" + auxiliary.MappingPeopletoFolder(people) + "/" + file_name
 	path, _ := filepath.Abs(file_path)
 	file, _ := os.Open(path)
@@ -101,6 +110,12 @@ func ReadSegmentData(people auxiliary.People, segID int, batch_size int) (Varian
 			k2 := strings.Split(row[2], ":")[1][1:]
 			kval2, _ := big.NewInt(1).SetString(k2, 0)
 			keyhash2 = kval2.Bytes()
+			continue
+		}
+
+		if len(row[0]) < 8 {
+			fmt.Println(row)
+			fmt.Println(people)
 		}
 
 		if row[0][0:7] != "Segment" || row[0][7:] != strconv.Itoa(segID) {
@@ -133,9 +148,13 @@ func ReadSegmentData(people auxiliary.People, segID int, batch_size int) (Varian
 }
 
 // Read the key hash
-func ReadKeyhash(people auxiliary.People, batch_size int) (keyhash1, keyhash2 []byte) {
+func ReadKeyhash(people auxiliary.People, batch_size int, option bool) (keyhash1, keyhash2 []byte) {
 	subfolder := "BlockSize_" + strconv.Itoa(batch_size)
-	file_name := people.Name + "_Segments.csv"
+	file_name := people.Name
+	if option {
+		file_name = file_name + "_Hosted"
+	}
+	file_name = file_name + "_Segments.csv"
 	file_path := "../../../Segments_Enc_Data_Trivium/" + subfolder + "/" + auxiliary.MappingPeopletoFolder(people) + "/" + file_name
 	path, _ := filepath.Abs(file_path)
 	file, _ := os.Open(path)
@@ -249,7 +268,7 @@ func ReadPK(params tfhe.Parameters[uint32]) (pk auxiliary.PublicKey_tfheb) {
 }
 
 // Get Ciphertext SegKey with Public Key
-func GetSegKeyFromPK(pk auxiliary.PublicKey_tfheb, rsid int, batch_size int, Indiv []auxiliary.People) (res1, res2 [][]tfhe.LWECiphertext[uint32]) {
+func GetSegKeyFromPK(pk auxiliary.PublicKey_tfheb, rsid int, batch_size int, Indiv []auxiliary.People, option bool) (res1, res2 [][]tfhe.LWECiphertext[uint32]) {
 	Data_Len := len(Indiv)
 	res1 = make([][]tfhe.LWECiphertext[uint32], Data_Len)
 	res2 = make([][]tfhe.LWECiphertext[uint32], Data_Len)
@@ -269,8 +288,16 @@ func GetSegKeyFromPK(pk auxiliary.PublicKey_tfheb, rsid int, batch_size int, Ind
 			seg_ID := auxiliary.SegmentID(Indiv[index], rsid, auxiliary.Seg_num)
 			keyinfo1, _ := GenerateRawKey(Indiv[index], 1)
 			keyinfo2, _ := GenerateRawKey(Indiv[index], 2)
-			segkey1 := GenSegmentKey(keyinfo1, seg_ID, batch_size)
-			segkey2 := GenSegmentKey(keyinfo2, seg_ID, batch_size)
+
+			var segkey1, segkey2 []int
+			if option {
+				segkey1 = GenKeyHostedMode(keyinfo1, batch_size)
+				segkey2 = GenKeyHostedMode(keyinfo2, batch_size)
+			} else {
+				segkey1 = GenSegmentKey(keyinfo1, seg_ID, batch_size)
+				segkey2 = GenSegmentKey(keyinfo2, seg_ID, batch_size)
+			}
+
 			res1[index] = make([]tfhe.LWECiphertext[uint32], 80)
 			res2[index] = make([]tfhe.LWECiphertext[uint32], 80)
 
@@ -292,8 +319,8 @@ func GetSegKeyFromPK(pk auxiliary.PublicKey_tfheb, rsid int, batch_size int, Ind
 	return
 }
 
-// Get Ciphertext SegKey with Public Key
-func GetSegKeyFromPKForAppID(pk auxiliary.PublicKey_tfheb, appid int, batch_size int, Indiv []auxiliary.People) (res1, res2 [][]tfhe.LWECiphertext[uint32]) {
+// Get Ciphertext SegKey with Public Key, option decide whehter Hosted Mode,then appid is useless
+func GetSegKeyFromPKForAppID(pk auxiliary.PublicKey_tfheb, appid int, batch_size int, Indiv []auxiliary.People, option bool) (res1, res2 [][]tfhe.LWECiphertext[uint32]) {
 	Data_Len := len(Indiv)
 
 	res1 = make([][]tfhe.LWECiphertext[uint32], Data_Len)
@@ -313,8 +340,14 @@ func GetSegKeyFromPKForAppID(pk auxiliary.PublicKey_tfheb, appid int, batch_size
 		go func() {
 			keyinfo1, _ := GenerateRawKey(Indiv[index], 1)
 			keyinfo2, _ := GenerateRawKey(Indiv[index], 2)
-			segkey1 := GenSegmentKey(keyinfo1, appid, batch_size)
-			segkey2 := GenSegmentKey(keyinfo2, appid, batch_size)
+			var segkey1, segkey2 []int
+			if option {
+				segkey1 = GenKeyHostedMode(keyinfo1, batch_size)
+				segkey2 = GenKeyHostedMode(keyinfo2, batch_size)
+			} else {
+				segkey1 = GenSegmentKey(keyinfo1, appid, batch_size)
+				segkey2 = GenSegmentKey(keyinfo2, appid, batch_size)
+			}
 			res1[index] = make([]tfhe.LWECiphertext[uint32], 80)
 			res2[index] = make([]tfhe.LWECiphertext[uint32], 80)
 
@@ -337,7 +370,7 @@ func GetSegKeyFromPKForAppID(pk auxiliary.PublicKey_tfheb, appid int, batch_size
 }
 
 // Get the Ciphertext Data Segment for Calculation
-func GetCiphertextData(rsid int, eval *tfhe.BinaryEvaluator, batch_size int, Indiv []auxiliary.People) [][]Variant_TFHE {
+func GetCiphertextData(rsid int, eval *tfhe.BinaryEvaluator, batch_size int, Indiv []auxiliary.People, option bool) [][]Variant_TFHE {
 	Data_Len := len(Indiv)
 
 	now := time.Now()
@@ -356,7 +389,7 @@ func GetCiphertextData(rsid int, eval *tfhe.BinaryEvaluator, batch_size int, Ind
 
 		go func() {
 			seg_ID := auxiliary.SegmentID(Indiv[index], rsid, auxiliary.Seg_num)
-			Seg, _, _ := ReadSegmentData(Indiv[index], seg_ID, batch_size)
+			Seg, _, _ := ReadSegmentData(Indiv[index], seg_ID, batch_size, option)
 			Data[index] = make([]Variant_TFHE, len(Seg))
 			for j := 0; j < len(Seg); j++ {
 				Data[index][j] = Enc_Variant_Raw(Seg[j], eval.Parameters)
@@ -374,7 +407,7 @@ func GetCiphertextData(rsid int, eval *tfhe.BinaryEvaluator, batch_size int, Ind
 }
 
 // Recover the data for calculation in ciphertext
-func Data_Recover(eval *tfhe.BinaryEvaluator, Data [][]Variant_TFHE, segkey1 [][]tfhe.LWECiphertext[uint32], segkey2 [][]tfhe.LWECiphertext[uint32]) [][]Variant_TFHE {
+func Data_Recover(eval *tfhe.BinaryEvaluator, Data [][]Variant_TFHE, segkey1 [][]tfhe.LWECiphertext[uint32], segkey2 [][]tfhe.LWECiphertext[uint32], Indiv []auxiliary.People, rsid int, option bool) [][]Variant_TFHE {
 	Data_Len := len(Data)
 	now := time.Now()
 
@@ -391,6 +424,9 @@ func Data_Recover(eval *tfhe.BinaryEvaluator, Data [][]Variant_TFHE, segkey1 [][
 		ch <- struct{}{}
 		go func() {
 			iv := make([]int, 80)
+			if option {
+				iv = GenIVHostedMode(auxiliary.SegmentID(Indiv[index], rsid, auxiliary.Seg_num))
+			}
 			var triv Trivium_TFHE
 			triv.Init(segkey1[index], segkey2[index], eval.ShallowCopy(), iv)
 
@@ -468,15 +504,15 @@ func GetDistribute(rsid int, eval *tfhe.BinaryEvaluator, Dec_Data [][]Variant_TF
 }
 
 // query a rsid in ciphertext
-func QueryCiphertext(rsid int, segkey1, segkey2 [][]tfhe.LWECiphertext[uint32], eval *tfhe.BinaryEvaluator, batch_size int, Indiv []auxiliary.People) []BigValueCiphertext {
+func QueryCiphertext(rsid int, segkey1, segkey2 [][]tfhe.LWECiphertext[uint32], eval *tfhe.BinaryEvaluator, batch_size int, Indiv []auxiliary.People, option bool) []BigValueCiphertext {
 
 	Data_Len := len(Indiv)
 
 	fmt.Println("BlockSize: " + strconv.Itoa(batch_size) + ", Processing Query of " + strconv.Itoa(Data_Len) + " individuals...")
 
-	Data := GetCiphertextData(rsid, eval, batch_size, Indiv)
+	Data := GetCiphertextData(rsid, eval, batch_size, Indiv, option)
 
-	Dec_Data := Data_Recover(eval, Data, segkey1, segkey2)
+	Dec_Data := Data_Recover(eval, Data, segkey1, segkey2, Indiv, rsid, option)
 
 	res := GetDistribute(rsid, eval, Dec_Data)
 
@@ -485,9 +521,9 @@ func QueryCiphertext(rsid int, segkey1, segkey2 [][]tfhe.LWECiphertext[uint32], 
 }
 
 // Get Ciphertext CODIS Data
-func GetCodisDataCiphtertext(eval *tfhe.BinaryEvaluator, Data_Len int, batch_size int) []CODIS_TFHE {
+func GetCodisDataCiphtertext(eval *tfhe.BinaryEvaluator, Data_Len int, batch_size int, option bool) []CODIS_TFHE {
 	now := time.Now()
-	rawdata, _, _ := ReadCODISData(batch_size)
+	rawdata, _, _ := ReadCODISData(batch_size, option)
 	triv_rawdata := Encode_CODIS(rawdata)
 	Data := make([]CODIS_TFHE, Data_Len)
 
@@ -517,7 +553,7 @@ func GetCodisDataCiphtertext(eval *tfhe.BinaryEvaluator, Data_Len int, batch_siz
 }
 
 // Data Recover for CODIS Data
-func Data_Recover_CODIS(eval *tfhe.BinaryEvaluator, Data_Len int, Data []CODIS_TFHE, segkey1 [][]tfhe.LWECiphertext[uint32], segkey2 [][]tfhe.LWECiphertext[uint32]) []CODIS_TFHE {
+func Data_Recover_CODIS(eval *tfhe.BinaryEvaluator, Data_Len int, Data []CODIS_TFHE, segkey1 [][]tfhe.LWECiphertext[uint32], segkey2 [][]tfhe.LWECiphertext[uint32], option bool) []CODIS_TFHE {
 	now := time.Now()
 
 	Dec_Data := make([]CODIS_TFHE, Data_Len)
@@ -534,6 +570,9 @@ func Data_Recover_CODIS(eval *tfhe.BinaryEvaluator, Data_Len int, Data []CODIS_T
 		ch <- struct{}{}
 		go func() {
 			iv := make([]int, 80)
+			if option {
+				iv = GenIVHostedMode(applications.App_id_SearchPerson)
+			}
 
 			var triv Trivium_TFHE
 			triv.Init(segkey1[index], segkey2[index], eval.ShallowCopy(), iv)
@@ -581,12 +620,12 @@ func CODIS_Set_Comparasion(Data_Len int, Dec_Data []CODIS_TFHE, eval *tfhe.Binar
 }
 
 // query a person in ciphertext
-func SearchPerson(QueryCODIS CODIS_TFHE, segkey1, segkey2 [][]tfhe.LWECiphertext[uint32], eval *tfhe.BinaryEvaluator, Data_Len int, batch_size int) (res []tfhe.LWECiphertext[uint32]) {
+func SearchPerson(QueryCODIS CODIS_TFHE, segkey1, segkey2 [][]tfhe.LWECiphertext[uint32], eval *tfhe.BinaryEvaluator, Data_Len int, batch_size int, option bool) (res []tfhe.LWECiphertext[uint32]) {
 
 	fmt.Println("BlockSize: " + strconv.Itoa(batch_size) + ", Processing Person Searching in " + strconv.Itoa(Data_Len) + " individuals...")
-	Data := GetCodisDataCiphtertext(eval, Data_Len, batch_size)
+	Data := GetCodisDataCiphtertext(eval, Data_Len, batch_size, option)
 
-	Dec_Data := Data_Recover_CODIS(eval, Data_Len, Data, segkey1, segkey2)
+	Dec_Data := Data_Recover_CODIS(eval, Data_Len, Data, segkey1, segkey2, option)
 
 	res = CODIS_Set_Comparasion(Data_Len, Dec_Data, eval, QueryCODIS)
 
@@ -595,10 +634,10 @@ func SearchPerson(QueryCODIS CODIS_TFHE, segkey1, segkey2 [][]tfhe.LWECiphertext
 }
 
 // A user can query his rsid
-func Userquery(people auxiliary.People, rsid int, segkey1, segkey2 []tfhe.LWECiphertext[uint32], batch_size int, eval *tfhe.BinaryEvaluator) (res [4]tfhe.LWECiphertext[uint32]) {
+func Userquery(people auxiliary.People, rsid int, segkey1, segkey2 []tfhe.LWECiphertext[uint32], batch_size int, eval *tfhe.BinaryEvaluator, option bool) (res [4]tfhe.LWECiphertext[uint32]) {
 
 	seg_ID := auxiliary.SegmentID(people, rsid, auxiliary.Seg_num)
-	Seg, _, _ := ReadSegmentData(people, seg_ID, batch_size)
+	Seg, _, _ := ReadSegmentData(people, seg_ID, batch_size, option)
 
 	var QueryVariant Variant
 	QueryVariant.Rsid = Encode_rsID(rsid)
@@ -612,6 +651,9 @@ func Userquery(people auxiliary.People, rsid int, segkey1, segkey2 []tfhe.LWECip
 	now := time.Now()
 
 	iv := make([]int, 80)
+	if option {
+		iv = GenIVHostedMode(seg_ID)
+	}
 	var triv Trivium_TFHE
 	triv.Init(segkey1, segkey2, eval, iv)
 
@@ -678,15 +720,15 @@ func GetMergedGenotype(rsid int, eval *tfhe.BinaryEvaluator, Dec_Data [][]Varian
 }
 
 // Perform a Boolean GWAS in ciphertext
-func GWASBool(rsid int, segkey1, segkey2 [][]tfhe.LWECiphertext[uint32], eval *tfhe.BinaryEvaluator, batch_size int, Indiv []auxiliary.People, phenotype []BigValueCiphertext) (Fix16, Int72Ciphertext) {
+func GWASBool(rsid int, segkey1, segkey2 [][]tfhe.LWECiphertext[uint32], eval *tfhe.BinaryEvaluator, batch_size int, Indiv []auxiliary.People, phenotype []BigValueCiphertext, option bool) (Fix16, Int72Ciphertext) {
 
 	Data_Len := len(Indiv)
 
 	fmt.Println("BlockSize: " + strconv.Itoa(batch_size) + ", Processing GWAS of " + strconv.Itoa(Data_Len) + " individuals...")
 
-	Data := GetCiphertextData(rsid, eval, batch_size, Indiv)
+	Data := GetCiphertextData(rsid, eval, batch_size, Indiv, option)
 
-	Dec_Data := Data_Recover(eval, Data, segkey1, segkey2)
+	Dec_Data := Data_Recover(eval, Data, segkey1, segkey2, Indiv, rsid, option)
 
 	now := time.Now()
 

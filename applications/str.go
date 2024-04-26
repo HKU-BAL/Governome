@@ -46,7 +46,7 @@ func GenRandomCODIS() (cod CODIS) {
 }
 
 // Generate Random CODIS Data, then save it
-func GenAndSaveData() {
+func GenAndSaveCODISData() {
 
 	now := time.Now()
 

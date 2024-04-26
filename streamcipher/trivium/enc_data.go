@@ -123,13 +123,28 @@ func SegmentToStrings(seg_data [][]Variant, keyhash1, keyhash2 []byte, Indivname
 	return string_data
 }
 
-// Encrypt the data with keyinfo
-func Data_Enc(RawData [][]Variant, keyinfo1, keyinfo2 []byte, batch_size int) [][]Variant {
+// Encrypt the data with keyinfo, with option, if option == true, Hosted mode, else, each segment a key
+func Data_Enc(RawData [][]Variant, keyinfo1, keyinfo2 []byte, batch_size int, option bool) [][]Variant {
 	Stream := make([][]Variant, auxiliary.Seg_num)
-	iv := make([]int, 80)
+
+	StreamKey1 := make([]int, 80)
+	StreamKey2 := make([]int, 80)
+
+	if option {
+		StreamKey1 = GenKeyHostedMode(keyinfo1, batch_size)
+		StreamKey2 = GenKeyHostedMode(keyinfo2, batch_size)
+	}
+
 	for i := 0; i < auxiliary.Seg_num; i++ {
-		StreamKey1 := GenSegmentKey(keyinfo1, i, batch_size)
-		StreamKey2 := GenSegmentKey(keyinfo2, i, batch_size)
+		if !option {
+			StreamKey1 = GenSegmentKey(keyinfo1, i, batch_size)
+			StreamKey2 = GenSegmentKey(keyinfo2, i, batch_size)
+		}
+		iv := make([]int, 80)
+		if option {
+			iv = GenIVHostedMode(i)
+		}
+
 		StreamKey := make([]int, 80)
 		for j := 0; j < 80; j++ {
 			StreamKey[j] = StreamKey1[j] ^ StreamKey2[j]
