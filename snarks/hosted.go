@@ -126,7 +126,7 @@ func EncStreamWithPublicKeyWithProveTFHE_Hosted(keyinfo []byte,
 // Reconstruct the publicWitness With the SegKey ciphertext and its hash in hosted mode
 func ConstructpublicWitnessWithSegKeyHosted(keyhash []byte, seg_key_ct []tfhe.LWECiphertext[uint32]) []witness.Witness {
 	batchnum := int(math.Ceil(float64(80 / Batch_size_Trivium)))
-	assignment := make([]DefaultCircuit, batchnum)
+	assignment := make([]HostedCircuit, batchnum)
 
 	for k := 0; k < batchnum; k++ {
 		assignment[k].Batch_ID = k
