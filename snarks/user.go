@@ -219,7 +219,7 @@ func SaveSegkey(segkey []tfhe.LWECiphertext[uint32], people auxiliary.People, ke
 
 // Read Segkey Ciphertext from file
 func ReadSegKey(people auxiliary.People, keyholder int, segID int, batchsize int, params tfhe.Parameters[uint32], option bool) (segkey []tfhe.LWECiphertext[uint32]) {
-	fullpath := "../../../Snarks/ProofTrivium/"
+	fullpath := "../../../Snarks/SegKey/"
 	fullpath = fullpath + "BlockSize_" + strconv.Itoa(Batch_size_Trivium) + "/"
 	fullpath = fullpath + auxiliary.MappingPeopletoFolder(people) + "/"
 	fullpath = fullpath + people.Name + "/"
@@ -245,7 +245,7 @@ func ReadSegKey(people auxiliary.People, keyholder int, segID int, batchsize int
 			data, _ := os.ReadFile(filepath)
 			buf.Write(data)
 
-			for i := 0; i < size; i++ {
+			for i := 0; i < batchsize; i++ {
 				if k*batchsize+i < 80 {
 					segkey[k*batchsize+i] = tfhe.NewLWECiphertext[uint32](params)
 					segkey[k*batchsize+i].ReadFrom(&buf)
