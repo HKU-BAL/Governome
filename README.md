@@ -23,14 +23,14 @@ Download and install Golang from the official website (https://golang.org/dl/).
 # Download the latest Golang version 1.21 by visiting the official website (https://golang.org/dl/) and, 
 # copying the download link for the Linux tarball.
 # An example is shown below:
-wget https://golang.org/dl/go1.21.6.linux-amd64.tar.gz
+wget https://golang.org/dl/go1.21.10.linux-amd64.tar.gz
 
 # Extract the downloaded tarball to your preferred local directory. In this example, we'll use `$HOME/.local`:
 mkdir -p $HOME/.local
-tar -xvzf go1.21.6.linux-amd64.tar.gz -C $HOME/.local
+tar -xvzf go1.21.10.linux-amd64.tar.gz -C $HOME/.local
 
 # Remove the tarball after extraction
-rm go1.21.6.linux-amd64.tar.gz
+rm go1.21.10.linux-amd64.tar.gz
 
 # Set up your Go workspace and environment variables
 ## Create the required directory structure:
@@ -44,7 +44,7 @@ export PATH=$PATH:$GOROOT/bin:$GOPATH/bin' >> ~/.bashrc
 source ~/.bashrc
 
 ## Verify the installation
-## You will get "go version go1.21.6 linux/amd64" if installed successfully
+## You will get "go version go1.21.10 linux/amd64" if installed successfully
 go version
 ```
 
