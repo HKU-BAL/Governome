@@ -51,7 +51,7 @@ func ReadPhenotype(IndivLimit []auxiliary.People, Population string) ([]auxiliar
 			continue
 		}
 
-		if fields[2] != Population {
+		if fields[2] != Population && Population != "ALL" {
 			continue
 		}
 
