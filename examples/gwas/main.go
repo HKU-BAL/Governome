@@ -45,9 +45,8 @@ func GWAS(Parameter tfhe.ParametersLiteral[uint32], rsid string, population stri
 
 	if Readsymbol {
 		for i := 0; i < DataLen; i++ {
-			segID := auxiliary.SegmentID(Indiv[i], auxiliary.RsID_s2i(rsid), auxiliary.Seg_num)
-			segkey1[i] = snarks.ReadSegKey(Indiv[i], 1, segID, 1, params, option)
-			segkey2[i] = snarks.ReadSegKey(Indiv[i], 2, segID, 1, params, option)
+			segkey1[i] = snarks.ReadSegKey(Indiv[i], 1, params)
+			segkey2[i] = snarks.ReadSegKey(Indiv[i], 2, params)
 		}
 	} else {
 		pk := auxiliary.GenLWEPublicKey_tfheb(enc)
@@ -60,15 +59,15 @@ func GWAS(Parameter tfhe.ParametersLiteral[uint32], rsid string, population stri
 		for i := 0; i < DataLen; i++ {
 			segID := auxiliary.SegmentID(Indiv[i], auxiliary.RsID_s2i(rsid), auxiliary.Seg_num)
 			keyhash1, keyhash2 := trivium.ReadKeyhash(Indiv[i], 1, option)
-			proof1 := snarks.ReadProof(Indiv[i], 1, segID, 1, option)
-			proof2 := snarks.ReadProof(Indiv[i], 2, segID, 1, option)
+			proof1 := snarks.ReadProof(Indiv[i], 1, 1)
+			proof2 := snarks.ReadProof(Indiv[i], 2, 1)
 			var publicWitness1, publicWitness2 []witness.Witness
 			if option {
 				publicWitness1 = snarks.ConstructpublicWitnessWithSegKeyHosted(keyhash1, segkey1[i])
-				publicWitness2 = snarks.ConstructpublicWitnessWithSegKeyHosted(keyhash2, segkey2[i])
+				publicWitness2 = snarks.ConstructpublicWitnessWithSegKeyDefault(segID, keyhash2, segkey2[i])
 			} else {
 				publicWitness1 = snarks.ConstructpublicWitnessWithSegKeyDefault(segID, keyhash1, segkey1[i])
-				publicWitness2 = snarks.ConstructpublicWitnessWithSegKeyDefault(segID, keyhash2, segkey2[i])
+				publicWitness2 = snarks.ConstructpublicWitnessWithSegKeyHosted(keyhash2, segkey2[i])
 			}
 
 			for k := 0; k < len(proof1); k++ {

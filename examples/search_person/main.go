@@ -15,7 +15,7 @@ import (
 	"github.com/sp301415/tfhe-go/tfhe"
 )
 
-func Trivium_Search(query_target applications.CODIS, Parameter tfhe.ParametersLiteral[uint32], Readsymbol bool, Verifysymbol bool, option bool) {
+func Boolean_Search(query_target applications.CODIS, Parameter tfhe.ParametersLiteral[uint32], Readsymbol bool, Verifysymbol bool, option bool, dicpath string) {
 	params := Parameter.Compile()
 
 	enc := tfhe.NewBinaryEncryptor(params)
@@ -40,8 +40,8 @@ func Trivium_Search(query_target applications.CODIS, Parameter tfhe.ParametersLi
 
 	if Readsymbol {
 		for i := 0; i < DataLen; i++ {
-			segkey1[i] = snarks.ReadSegKey(Indiv[i], 1, applications.App_id_SearchPerson, 1, params, option)
-			segkey2[i] = snarks.ReadSegKey(Indiv[i], 2, applications.App_id_SearchPerson, 1, params, option)
+			segkey1[i] = snarks.ReadSegKey(Indiv[i], 1, params)
+			segkey2[i] = snarks.ReadSegKey(Indiv[i], 2, params)
 		}
 	} else {
 		segkey1, segkey2 = trivium.GetSegKeyFromPKForAppID(pk, applications.App_id_SearchPerson, 1, Indiv, option)
@@ -53,8 +53,8 @@ func Trivium_Search(query_target applications.CODIS, Parameter tfhe.ParametersLi
 		for i := 0; i < DataLen; i++ {
 			keyhash1, keyhash2 := trivium.ReadKeyhash(Indiv[i], 1, option)
 			var publicWitness1, publicWitness2 []witness.Witness
-			proof1 := snarks.ReadProof(Indiv[i], 1, applications.App_id_SearchPerson, 1, option)
-			proof2 := snarks.ReadProof(Indiv[i], 2, applications.App_id_SearchPerson, 1, option)
+			proof1 := snarks.ReadProof(Indiv[i], 1, 1)
+			proof2 := snarks.ReadProof(Indiv[i], 2, 1)
 			if option {
 				publicWitness1 = snarks.ConstructpublicWitnessWithSegKeyHosted(keyhash1, segkey1[i])
 				publicWitness2 = snarks.ConstructpublicWitnessWithSegKeyHosted(keyhash2, segkey2[i])
@@ -100,6 +100,7 @@ func main() {
 	readsymbol := flag.Bool("ReadKey", false, "Whether read Data from file, not suitable for toy params")
 	verifysymbol := flag.Bool("Verify", false, "Whether verifying the proofs")
 	Hosted := flag.Bool("Hosted", false, "Whether to use hosted mode")
+	Path := flag.String("path", "../../..", "Target FilePath")
 	flag.Parse()
 
 	var query_target applications.CODIS
@@ -110,9 +111,9 @@ func main() {
 	}
 
 	if *toy {
-		Trivium_Search(query_target, auxiliary.ParamsToyBoolean, *readsymbol, *verifysymbol, *Hosted)
+		Boolean_Search(query_target, auxiliary.ParamsToyBoolean, *readsymbol, *verifysymbol, *Hosted, *Path)
 	} else {
-		Trivium_Search(query_target, tfhe.ParamsBinaryOriginal, *readsymbol, *verifysymbol, *Hosted)
+		Boolean_Search(query_target, tfhe.ParamsBinaryOriginal, *readsymbol, *verifysymbol, *Hosted, *Path)
 	}
 
 }

@@ -24,13 +24,13 @@ func Match(s string, set []auxiliary.People) int {
 
 // Read the example phenotype in Hail
 func ReadPhenotype(IndivLimit []auxiliary.People, Population string) ([]auxiliary.People, []int, []int, []int) {
-
+	dicpath := auxiliary.ReadPath()
 	Individuals := []auxiliary.People{}
 	isFemale := []int{}
 	PurpleHair := []int{}
 	CaffeineConsumption := []int{}
 
-	path, _ := filepath.Abs("../../../Phenotype/1kg_annotations.txt")
+	path, _ := filepath.Abs(dicpath + "/Phenotype/1kg_annotations.txt")
 	file, _ := os.Open(path)
 	defer file.Close()
 

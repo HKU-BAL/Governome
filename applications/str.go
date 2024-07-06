@@ -47,10 +47,10 @@ func GenRandomCODIS() (cod CODIS) {
 
 // Generate Random CODIS Data, then save it
 func GenAndSaveCODISData() {
-
+	dicpath := auxiliary.ReadPath()
 	now := time.Now()
 
-	os.Mkdir("../../../CODIS_Data/", os.ModePerm)
+	os.Mkdir(dicpath+"/CODIS_Data/", os.ModePerm)
 	Indivs := auxiliary.ReadIndividuals()
 
 	R_Data := make([][]string, len(Indivs))
@@ -61,7 +61,7 @@ func GenAndSaveCODISData() {
 	}
 
 	file_name := "Random_CODIS_Data.csv"
-	file_path := "../../../CODIS_Data/" + file_name
+	file_path := dicpath + "/CODIS_Data/" + file_name
 	f, _ := os.Create(file_path)
 	w := csv.NewWriter(f)
 
@@ -75,10 +75,10 @@ func GenAndSaveCODISData() {
 
 // Read the CODIS Data
 func ReadCODISData() []CODIS {
-
+	dicpath := auxiliary.ReadPath()
 	Indivs := auxiliary.ReadIndividuals()
 
-	path, _ := filepath.Abs("../../../CODIS_Data/Random_CODIS_Data.csv")
+	path, _ := filepath.Abs(dicpath + "/CODIS_Data/Random_CODIS_Data.csv")
 
 	file, _ := os.Open(path)
 	defer file.Close()

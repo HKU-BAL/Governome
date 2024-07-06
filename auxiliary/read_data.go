@@ -58,10 +58,49 @@ func RsID_i2s(val int) string {
 	return "rs" + str
 }
 
+// Generate a file to show the root path
+func SavePath(dicpath string) {
+	f, _ := os.Create("../../defaultPath")
+	w := csv.NewWriter(f)
+
+	pathstring := make([][]string, 1)
+	pathstring[0] = make([]string, 1)
+	pathstring[0][0] = dicpath
+
+	w.WriteAll(pathstring)
+
+	w.Flush()
+	f.Close()
+}
+
+// Read the root path from the file
+func ReadPath() string {
+	var dicpath string
+	path, _ := filepath.Abs("../../defaultPath")
+	file, _ := os.Open(path)
+	defer file.Close()
+
+	r := csv.NewReader(file)
+	for {
+		row, err := r.Read()
+		if err != nil && err != io.EOF {
+			log.Fatalf("can not read, err is %+v", err)
+		}
+		if err == io.EOF {
+			break
+		}
+
+		dicpath = row[0]
+
+	}
+	return dicpath
+}
+
 // Read all Individual names
 func ReadIndividuals() []People {
+	dicpath := ReadPath()
 	Individuals := make([]People, 0)
-	path, _ := filepath.Abs("../../../Individuals/Individuals.csv")
+	path, _ := filepath.Abs(dicpath + "/Individuals/Individuals.csv")
 	file, _ := os.Open(path)
 	defer file.Close()
 
@@ -86,10 +125,11 @@ func ReadIndividuals() []People {
 
 // Read All plaintext data
 func ReadPlaintext_data(people People) ([]int, []int) {
+	dicpath := ReadPath()
 	rsID := []int{}
 	genotype := []int{}
 
-	path, _ := filepath.Abs("../../../Plaintext_Data/" + MappingPeopletoFolder(people) + "/" + people.Name + ".csv")
+	path, _ := filepath.Abs(dicpath + "/Plaintext_Data/" + MappingPeopletoFolder(people) + "/" + people.Name + ".csv")
 	file, _ := os.Open(path)
 	defer file.Close()
 

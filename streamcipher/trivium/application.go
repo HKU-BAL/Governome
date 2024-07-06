@@ -107,29 +107,6 @@ func DecCODISCiphertextBySegKey(encrypted_data CODIS_TFHE, triv *Trivium_TFHE, e
 	return
 }
 
-// // Generate Mimc hash on 288 bits trivium state for an appid
-// func GenFullHashForApplicationLayer(keyinfo []byte, app_id int, batch_size int) []byte {
-
-// 	StreamKey := GenSegmentKey(keyinfo, app_id, batch_size)
-// 	iv := make([]int, 80)
-// 	var triv Trivium
-// 	triv.Init(StreamKey, iv)
-
-// 	temp1 := big.NewInt(0)
-// 	temp2 := big.NewInt(0)
-// 	lambda := big.NewInt(1)
-// 	for i := 0; i < 144; i++ {
-// 		temp1 = big.NewInt(1).Add(temp1, big.NewInt(1).Mul(lambda, big.NewInt(1).SetInt64(int64(triv.L[i]))))
-// 		temp2 = big.NewInt(1).Add(temp2, big.NewInt(1).Mul(lambda, big.NewInt(1).SetInt64(int64(triv.L[i+144]))))
-// 		lambda = big.NewInt(1).Mul(lambda, big.NewInt(2))
-// 	}
-// 	newbytes := auxiliary.PadBytes(temp1.Bytes(), auxiliary.Mimchashcurve.Size())
-// 	newbytes = append(newbytes, auxiliary.PadBytes(temp2.Bytes(), auxiliary.Mimchashcurve.Size())...)
-// 	res, _ := auxiliary.MimcHashRaw(newbytes, auxiliary.Mimchashcurve)
-
-// 	return res
-// }
-
 // Encode the CODIS to trivium form
 func Encode_CODIS(cod []applications.CODIS) []CODIS {
 	res := make([]CODIS, len(cod))
@@ -173,23 +150,17 @@ func Decode_CODIS(cod []CODIS) []applications.CODIS {
 // Encrypt the CODIS data
 func XOR_CODIS(cod CODIS, keyinfo1, keyinfo2 []byte, batch_size int, option bool) CODIS {
 
-	iv := make([]int, 80)
-	StreamKey1 := make([]int, 80)
-	StreamKey2 := make([]int, 80)
+	var StreamKey1, StreamKey2, iv []int
 
 	if option {
 		StreamKey1 = GenKeyHostedMode(keyinfo1, batch_size)
+		StreamKey2 = GenSegmentKey(keyinfo2, applications.App_id_SearchPerson, batch_size)
+	} else {
+		StreamKey1 = GenSegmentKey(keyinfo1, applications.App_id_SearchPerson, batch_size)
 		StreamKey2 = GenKeyHostedMode(keyinfo2, batch_size)
 	}
 
-	if !option {
-		StreamKey1 = GenSegmentKey(keyinfo1, applications.App_id_SearchPerson, batch_size)
-		StreamKey2 = GenSegmentKey(keyinfo2, applications.App_id_SearchPerson, batch_size)
-	}
-
-	if option {
-		iv = GenIVHostedMode(applications.App_id_SearchPerson)
-	}
+	iv = GenIVHostedMode(applications.App_id_SearchPerson)
 
 	StreamKey := make([]int, 80)
 	for i := 0; i < 80; i++ {
@@ -214,34 +185,28 @@ func XOR_CODIS(cod CODIS, keyinfo1, keyinfo2 []byte, batch_size int, option bool
 // Encrypt the CODIS Data and Save it
 func EncAndSaveCODIS_Trivium(batch_size int, option bool) {
 	now := time.Now()
+	dicpath := auxiliary.ReadPath()
+	os.MkdirAll(dicpath+"/EncSTR", os.ModePerm)
+	file_name := "EncStr.csv"
+	if option {
+		file_name = "EncStrHosted.csv"
+	}
+	file_path := dicpath + "/EncSTR/" + file_name
+
 	data := applications.ReadCODISData()
 	cods := Encode_CODIS(data)
 	enc_cods := make([]CODIS, len(cods))
 	Indivs := auxiliary.ReadIndividuals()
 	keyhashset1 := make([]string, len(Indivs))
 	keyhashset2 := make([]string, len(Indivs))
-	// fullhashset1 := make([]string, len(Indivs))
-	// fullhashset2 := make([]string, len(Indivs))
 	for i := 0; i < len(Indivs); i++ {
 		keyinfo1, keyhash1 := GenerateRawKey(Indivs[i], 1)
 		keyinfo2, keyhash2 := GenerateRawKey(Indivs[i], 2)
 		keyhashset1[i] = "Hash1: " + big.NewInt(1).SetBytes(keyhash1).String()
 		keyhashset2[i] = "Hash2: " + big.NewInt(1).SetBytes(keyhash2).String()
-		// fullhash1 := GenFullHashForApplicationLayer(keyinfo1, applications.App_id, batch_size)
-		// fullhash2 := GenFullHashForApplicationLayer(keyinfo2, applications.App_id, batch_size)
-		// fullhashset1[i] = "Full Hash1: " + big.NewInt(1).SetBytes(fullhash1).String()
-		// fullhashset2[i] = "Full Hash2: " + big.NewInt(1).SetBytes(fullhash2).String()
 		enc_cods[i] = XOR_CODIS(cods[i], keyinfo1, keyinfo2, batch_size, option)
 	}
 	new_data := Decode_CODIS(enc_cods)
-
-	file_name := "BlockSize_" + strconv.Itoa(batch_size)
-	if option {
-		file_name = file_name + "_Hosted"
-	}
-	file_name = file_name + ".csv"
-	os.Mkdir("../../../CODIS_Data/Trivium_Enc_CODIS_Data", os.ModePerm)
-	file_path := "../../../CODIS_Data/Trivium_Enc_CODIS_Data/" + file_name
 
 	N_Data := make([][]string, len(Indivs))
 
@@ -249,8 +214,6 @@ func EncAndSaveCODIS_Trivium(batch_size int, option bool) {
 		N_Data[i] = make([]string, 4)
 		N_Data[i][0] = keyhashset1[i]
 		N_Data[i][1] = keyhashset2[i]
-		// N_Data[i][2] = fullhashset1[i]
-		// N_Data[i][3] = fullhashset2[i]
 		N_Data[i] = append(N_Data[i], new_data[i].Decode2String()...)
 	}
 
@@ -261,20 +224,20 @@ func EncAndSaveCODIS_Trivium(batch_size int, option bool) {
 	w.Flush()
 	f.Close()
 
-	fmt.Printf("BlockSize: "+strconv.Itoa(batch_size)+", Finish Encrypt and Save CODIS of "+strconv.Itoa(len(Indivs))+" Individuals in (%s)\n", time.Since(now))
+	fmt.Printf("Finish Encrypt and Save CODIS of "+strconv.Itoa(len(Indivs))+" Individuals in (%s)\n", time.Since(now))
 
 }
 
 // Read the Encrypted CODIS Data
-func ReadCODISData(batch_size int, option bool) (res []applications.CODIS, hash1, hash2 [][]byte) {
+func ReadCODISData(batch_size int, option bool, dicpath string) (res []applications.CODIS, hash1, hash2 [][]byte) {
 
 	Indivs := auxiliary.ReadIndividuals()
-	file_name := "BlockSize_" + strconv.Itoa(batch_size)
+
+	file_name := "EncStr.csv"
 	if option {
-		file_name = file_name + "_Hosted"
+		file_name = "EncStrHosted.csv"
 	}
-	file_name = file_name + ".csv"
-	file_path := "../../../CODIS_Data/Trivium_Enc_CODIS_Data/" + file_name
+	file_path := dicpath + "/EncSTR/" + file_name
 
 	path, _ := filepath.Abs(file_path)
 
@@ -284,8 +247,6 @@ func ReadCODISData(batch_size int, option bool) (res []applications.CODIS, hash1
 	res = make([]applications.CODIS, len(Indivs))
 	hash1 = make([][]byte, len(Indivs))
 	hash2 = make([][]byte, len(Indivs))
-	// fullhash1 = make([][]byte, len(Indivs))
-	// fullhash2 = make([][]byte, len(Indivs))
 
 	r := csv.NewReader(file)
 
@@ -305,11 +266,6 @@ func ReadCODISData(batch_size int, option bool) (res []applications.CODIS, hash1
 		hash1[i] = auxiliary.PadBytes(temp1.Bytes(), auxiliary.Mimchashcurve.Size())
 		temp2, _ := big.NewInt(1).SetString(strings.Split(row[1], " ")[1], 0)
 		hash2[i] = auxiliary.PadBytes(temp2.Bytes(), auxiliary.Mimchashcurve.Size())
-		// temp3, _ := big.NewInt(1).SetString(strings.Split(row[2], " ")[2], 0)
-		// fullhash1[i] = auxiliary.PadBytes(temp3.Bytes(), auxiliary.Mimchashcurve.Size())
-		// temp4, _ := big.NewInt(1).SetString(strings.Split(row[3], " ")[2], 0)
-		// fullhash2[i] = auxiliary.PadBytes(temp4.Bytes(), auxiliary.Mimchashcurve.Size())
-
 	}
 	return
 }

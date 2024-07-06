@@ -13,8 +13,7 @@ import (
 	"github.com/sp301415/tfhe-go/tfhe"
 )
 
-func Queryuser_Trivium(Parameter tfhe.ParametersLiteral[uint32], user_name, rsid string, Readsymbol bool, Verifysymbol bool, option bool) {
-
+func Queryuser_Boolen(Parameter tfhe.ParametersLiteral[uint32], user_name, rsid string, Readsymbol bool, Verifysymbol bool, option bool) {
 	var gt [4]int
 
 	params := Parameter.Compile()
@@ -38,9 +37,8 @@ func Queryuser_Trivium(Parameter tfhe.ParametersLiteral[uint32], user_name, rsid
 	}
 
 	if Readsymbol {
-		segID := auxiliary.SegmentID(people, auxiliary.RsID_s2i(rsid), auxiliary.Seg_num)
-		segkey1 = snarks.ReadSegKey(people, 1, segID, 1, params, option)
-		segkey2 = snarks.ReadSegKey(people, 2, segID, 1, params, option)
+		segkey1 = snarks.ReadSegKey(people, 1, params)
+		segkey2 = snarks.ReadSegKey(people, 2, params)
 	} else {
 		Indiv := make([]auxiliary.People, 1)
 		Indiv[0] = people
@@ -56,7 +54,7 @@ func Queryuser_Trivium(Parameter tfhe.ParametersLiteral[uint32], user_name, rsid
 		ccs := snarks.GenorReadR1CS(false, option)
 		_, VerifyKey := snarks.GenorReadSetup(ccs, false, option)
 		for i := 1; i < 3; i++ {
-			proof := snarks.ReadProof(people, i, segID, 1, option)
+			proof := snarks.ReadProof(people, i, 1)
 			var publicWitness []witness.Witness
 			if i == 1 {
 				if option {
@@ -101,8 +99,8 @@ func main() {
 	flag.Parse()
 
 	if *toy {
-		Queryuser_Trivium(auxiliary.ParamsToyBoolean, *user_name, *rsid, *readsymbol, *verifysymbol, *Hosted)
+		Queryuser_Boolen(auxiliary.ParamsToyBoolean, *user_name, *rsid, *readsymbol, *verifysymbol, *Hosted)
 	} else {
-		Queryuser_Trivium(tfhe.ParamsBinaryOriginal, *user_name, *rsid, *readsymbol, *verifysymbol, *Hosted)
+		Queryuser_Boolen(tfhe.ParamsBinaryOriginal, *user_name, *rsid, *readsymbol, *verifysymbol, *Hosted)
 	}
 }

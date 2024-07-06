@@ -16,62 +16,62 @@ import (
 )
 
 type HostedCircuit struct {
-	Secret_KeyInfo    frontend.Variable                                           `gnark:"kif"`
-	Secret_KeyQuo     frontend.Variable                                           `gnark:"kq"`
-	Secret_TriviumKey [Batch_size_Trivium]frontend.Variable                       `gnark:"sd"`
-	Secret_temp_Key   [Batch_size_Trivium][RingSize_Trivium]frontend.Variable     `gnark:"tsk"`
-	Secret_Error0     [Batch_size_Trivium]frontend.Variable                       `gnark:"ea"`
-	Secret_Error1     [Batch_size_Trivium][RingSize_Trivium]frontend.Variable     `gnark:"eb"`
-	Secret_Quo        [Batch_size_Trivium][RingSize_Trivium + 1]frontend.Variable `gnark:"quo"`
-	Batch_ID          frontend.Variable                                           `gnark:",public"`
-	ExpectedHash      frontend.Variable                                           `gnark:",public"`
-	Ct                [Batch_size_Trivium][RingSize_Trivium + 1]frontend.Variable `gnark:",public"`
+	Secret_KeyInfo    frontend.Variable                                   `gnark:"kif"`
+	Secret_KeyQuo     frontend.Variable                                   `gnark:"kq"`
+	Secret_TriviumKey [Block_Size]frontend.Variable                       `gnark:"sd"`
+	Secret_temp_Key   [Block_Size][RingSize_Boolean]frontend.Variable     `gnark:"tsk"`
+	Secret_Error0     [Block_Size]frontend.Variable                       `gnark:"ea"`
+	Secret_Error1     [Block_Size][RingSize_Boolean]frontend.Variable     `gnark:"eb"`
+	Secret_Quo        [Block_Size][RingSize_Boolean + 1]frontend.Variable `gnark:"quo"`
+	Batch_ID          frontend.Variable                                   `gnark:",public"`
+	ExpectedHash      frontend.Variable                                   `gnark:",public"`
+	Ct                [Block_Size][RingSize_Boolean + 1]frontend.Variable `gnark:",public"`
 }
 
-func Hosted_CheckKey(api frontend.API, kif, batchid, kq frontend.Variable, key [Batch_size_Trivium]frontend.Variable) {
+func Hosted_CheckKey(api frontend.API, kif, batchid, kq frontend.Variable, key [Block_Size]frontend.Variable) {
 	field, _ := big.NewInt(1).SetString("21888242871839275222246405745257275088548364400416034343698204186575808495617", 0)
-	modulus_Trivium := big.NewInt(1).Lsh(big.NewInt(1), Batch_size_Trivium)
-	kq_bound_Trivium := big.NewInt(1).Rsh(field, Batch_size_Trivium)
+	modulus := big.NewInt(1).Lsh(big.NewInt(1), Block_Size)
+	kq_bound := big.NewInt(1).Rsh(field, Block_Size)
 
 	mimc1, _ := mimc.NewMiMC(api)
 	appval := api.Add(batchid, 1)
 	mimc1.Write(kif, appval)
 	rawkey := mimc1.Sum()
 
-	val := api.Mul(kq, modulus_Trivium)
+	val := api.Mul(kq, modulus)
 
 	var keyval, temp frontend.Variable
 	keyval = 0
 	temp = 1
-	for i := 0; i < Batch_size_Trivium; i++ {
+	for i := 0; i < Block_Size; i++ {
 		keyval = api.Add(keyval, api.Mul(temp, key[i]))
 		temp = api.Mul(temp, 2)
 	}
 	val = api.Add(val, keyval)
 
-	api.AssertIsLessOrEqual(kq, kq_bound_Trivium)
+	api.AssertIsLessOrEqual(kq, kq_bound)
 	api.AssertIsEqual(rawkey, val)
 }
 
 func (circuit *HostedCircuit) Define(api frontend.API) error {
-	for i := 0; i < Batch_size_Trivium; i++ {
-		Trivium_CheckTFHEError(api, circuit.Secret_Error0[i])
+	for i := 0; i < Block_Size; i++ {
+		Boolean_CheckLWEError(api, circuit.Secret_Error0[i])
 		api.AssertIsBoolean(circuit.Secret_TriviumKey[i])
-		for j := 0; j < RingSize_Trivium; j++ {
-			Trivium_CheckTFHEError(api, circuit.Secret_Error1[i][j])
+		for j := 0; j < RingSize_Boolean; j++ {
+			Boolean_CheckRLWEError(api, circuit.Secret_Error1[i][j])
 			api.AssertIsBoolean(circuit.Secret_temp_Key[i][j])
 		}
-		for j := 0; j < RingSize_Trivium+1; j++ {
-			Trivium_CheckQuo(api, circuit.Secret_Quo[i][j])
+		for j := 0; j < RingSize_Boolean+1; j++ {
+			Boolean_CheckQuo(api, circuit.Secret_Quo[i][j])
 		}
 	}
-	Trivium_CheckHash(api, circuit.Secret_KeyInfo, circuit.ExpectedHash)
+	Boolean_CheckHash(api, circuit.Secret_KeyInfo, circuit.ExpectedHash)
 	Hosted_CheckKey(api, circuit.Secret_KeyInfo, circuit.Batch_ID, circuit.Secret_KeyQuo, circuit.Secret_TriviumKey)
 
-	for i := 0; i < Batch_size_Trivium; i++ {
-		New_ct := Trivium_EncTFHE(api, circuit.Secret_TriviumKey[i], circuit.Secret_Error0[i], circuit.Secret_temp_Key[i],
+	for i := 0; i < Block_Size; i++ {
+		New_ct := Boolean_EncTFHE(api, circuit.Secret_TriviumKey[i], circuit.Secret_Error0[i], circuit.Secret_temp_Key[i],
 			circuit.Secret_Error1[i], circuit.Secret_Quo[i])
-		for j := 0; j < RingSize_Trivium+1; j++ {
+		for j := 0; j < RingSize_Boolean+1; j++ {
 			api.AssertIsEqual(New_ct[j], circuit.Ct[i][j])
 		}
 	}
@@ -83,10 +83,10 @@ func EncStreamWithPublicKeyWithProveTFHE_Hosted(keyinfo []byte,
 
 	triv_params := tfhe.ParamsBinaryOriginal.Compile()
 	pk := trivium.ReadPK(triv_params)
-	batchnum := int(math.Ceil(float64(80 / Batch_size_Trivium)))
+	batchnum := int(math.Ceil(float64(80 / Block_Size)))
 	assignment := make([]HostedCircuit, batchnum)
 
-	seg_key, kq := trivium.GenKeyHostedModeWithQuo(keyinfo, Batch_size_Trivium)
+	seg_key, kq := trivium.GenKeyHostedModeWithQuo(keyinfo, Block_Size)
 	seg_key_ct := make([]tfhe.LWECiphertext[uint32], 80)
 	expecthash, _ := auxiliary.MimcHashRaw(keyinfo, auxiliary.Mimchashcurve)
 
@@ -95,19 +95,19 @@ func EncStreamWithPublicKeyWithProveTFHE_Hosted(keyinfo []byte,
 		assignment[k].Secret_KeyInfo = keyinfo
 		assignment[k].Secret_KeyQuo = kq[k]
 		assignment[k].ExpectedHash = expecthash
-		for i := 0; i < Batch_size_Trivium && k*Batch_size_Trivium+i < 80; i++ {
-			ct, spi := auxiliary.EncWithPublicKeyForZKSnarks_tfheb(uint32(seg_key[k*Batch_size_Trivium+i]), pk)
-			assignment[k].Secret_TriviumKey[i] = seg_key[k*Batch_size_Trivium+i]
+		for i := 0; i < Block_Size && k*Block_Size+i < 80; i++ {
+			ct, spi := auxiliary.EncWithPublicKeyForZKSnarks_tfheb(uint32(seg_key[k*Block_Size+i]), pk)
+			assignment[k].Secret_TriviumKey[i] = seg_key[k*Block_Size+i]
 			assignment[k].Secret_Error0[i] = int32(spi.E0)
-			for j := 0; j < RingSize_Trivium; j++ {
+			for j := 0; j < RingSize_Boolean; j++ {
 				assignment[k].Secret_temp_Key[i][j] = spi.TSK[j]
 				assignment[k].Secret_Error1[i][j] = int32(spi.E1[j])
 			}
-			for j := 0; j < RingSize_Trivium+1; j++ {
+			for j := 0; j < RingSize_Boolean+1; j++ {
 				assignment[k].Secret_Quo[i][j] = spi.Quo[j]
 				assignment[k].Ct[i][j] = ct.Value[j]
 			}
-			seg_key_ct[k*Batch_size_Trivium+i] = ct
+			seg_key_ct[k*Block_Size+i] = ct
 		}
 	}
 
@@ -125,7 +125,7 @@ func EncStreamWithPublicKeyWithProveTFHE_Hosted(keyinfo []byte,
 
 // Reconstruct the publicWitness With the SegKey ciphertext and its hash in hosted mode
 func ConstructpublicWitnessWithSegKeyHosted(keyhash []byte, seg_key_ct []tfhe.LWECiphertext[uint32]) []witness.Witness {
-	batchnum := int(math.Ceil(float64(80 / Batch_size_Trivium)))
+	batchnum := int(math.Ceil(float64(80 / Block_Size)))
 	assignment := make([]HostedCircuit, batchnum)
 
 	for k := 0; k < batchnum; k++ {
@@ -133,16 +133,16 @@ func ConstructpublicWitnessWithSegKeyHosted(keyhash []byte, seg_key_ct []tfhe.LW
 		assignment[k].Secret_KeyInfo = 0
 		assignment[k].Secret_KeyQuo = 0
 		assignment[k].ExpectedHash = keyhash
-		for i := 0; i < Batch_size_Trivium && k*Batch_size_Trivium+i < 80; i++ {
+		for i := 0; i < Block_Size && k*Block_Size+i < 80; i++ {
 			assignment[k].Secret_TriviumKey[i] = 0
 			assignment[k].Secret_Error0[i] = 0
-			for j := 0; j < RingSize_Trivium; j++ {
+			for j := 0; j < RingSize_Boolean; j++ {
 				assignment[k].Secret_temp_Key[i][j] = 0
 				assignment[k].Secret_Error1[i][j] = 0
 			}
-			for j := 0; j < RingSize_Trivium+1; j++ {
+			for j := 0; j < RingSize_Boolean+1; j++ {
 				assignment[k].Secret_Quo[i][j] = 0
-				assignment[k].Ct[i][j] = seg_key_ct[k*Batch_size_Trivium+i].Value[j]
+				assignment[k].Ct[i][j] = seg_key_ct[k*Block_Size+i].Value[j]
 			}
 		}
 	}

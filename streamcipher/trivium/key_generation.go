@@ -151,36 +151,21 @@ func GenSegmentKeyWithQuo(keyinfo []byte, segmentID int, batch_size int) ([]int,
 
 // Save secret key for tfheb
 func Save_SK(enc *tfhe.BinaryEncryptor) {
+	dicpath := auxiliary.ReadPath()
 
-	os.Mkdir("../../../Key_Information/", os.ModePerm)
+	os.MkdirAll(dicpath+"/Key_Information/", os.ModePerm)
 
 	var buf bytes.Buffer
 	enc.BaseEncryptor.SecretKey.WriteTo(&buf)
-	os.WriteFile("../../../Key_Information/Trivium_SecretKey", buf.Bytes(), 0644)
+	os.WriteFile(dicpath+"/Key_Information/Trivium_SecretKey", buf.Bytes(), 0644)
 
-	// os.Mkdir("../../../Key_Information/", os.ModePerm)
-	// file_path := "../../../Key_Information/Trivium_SecretKey.csv"
-	// Data := make([][]string, 1)
-
-	// Data[0] = make([]string, len(enc.BaseEncryptor.SecretKey.LWELargeKey.Value))
-	// for i := 0; i < len(enc.BaseEncryptor.SecretKey.LWELargeKey.Value); i++ {
-	// 	big_val := big.NewInt(1).SetUint64(uint64(enc.BaseEncryptor.SecretKey.LWELargeKey.Value[i]))
-	// 	Data[0][i] = big_val.String()
-	// }
-
-	// f, _ := os.Create(file_path)
-
-	// w := csv.NewWriter(f)
-
-	// w.WriteAll(Data)
-	// w.Flush()
-	// f.Close()
 }
 
 // Save Public key for tfheb
 func Save_PK(pk auxiliary.PublicKey_tfheb) {
-	os.Mkdir("../../../Key_Information/", os.ModePerm)
-	file_path := "../../../Key_Information/Trivium_PublicKey.csv"
+	dicpath := auxiliary.ReadPath()
+	os.MkdirAll(dicpath+"/Key_Information/", os.ModePerm)
+	file_path := dicpath + "/Key_Information/Trivium_PublicKey.csv"
 	size := len(pk.B)
 	Data := make([][]string, size+1)
 

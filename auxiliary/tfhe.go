@@ -80,7 +80,7 @@ func LimitSampleSlice_tfheb(s csprng.GaussianSampler[uint32], length int) []uint
 // Generate a public key with the Encryptor in tfhe-go
 func GenLWEPublicKey_tfheb(enc *tfhe.BinaryEncryptor) (pk PublicKey_tfheb) {
 	sk := enc.BaseEncryptor.SecretKey.LWEKey.Value
-	g := csprng.NewGaussianSamplerTorus[uint32](enc.Parameters.LWEStdDev())
+	g := csprng.NewGaussianSamplerTorus[uint32](enc.Parameters.GLWEStdDev())
 	N := len(sk)
 	pk.A = make([][]uint32, N)
 	for i := 0; i < N; i++ {
@@ -105,7 +105,8 @@ func GenLWEPublicKey_tfheb(enc *tfhe.BinaryEncryptor) (pk PublicKey_tfheb) {
 
 // Encrypt a value with public key, here input is in the full domain
 func EncWithPublicKey_tfheb(val uint32, pk PublicKey_tfheb) (ct tfhe.LWECiphertext[uint32]) {
-	g := csprng.NewGaussianSamplerTorus[uint32](pk.Params.LWEStdDev())
+	g1 := csprng.NewGaussianSamplerTorus[uint32](pk.Params.GLWEStdDev())
+	g2 := csprng.NewGaussianSamplerTorus[uint32](pk.Params.LWEStdDev())
 	var spi SecretProveInfo_tfheb
 	ct = tfhe.NewLWECiphertext(pk.Params)
 	N := len(ct.Value) - 1
@@ -113,8 +114,8 @@ func EncWithPublicKey_tfheb(val uint32, pk PublicKey_tfheb) (ct tfhe.LWECipherte
 	for i := 0; i < N; i++ {
 		spi.TSK[i] = uint32(rand.Intn(2))
 	}
-	spi.E1 = LimitSampleSlice_tfheb(g, N)
-	spi.E0 = LimitSample_tfheb(g)
+	spi.E1 = LimitSampleSlice_tfheb(g1, N)
+	spi.E0 = LimitSample_tfheb(g2)
 	ct.Value[0] = ScaleConstant_tfheb(val) + spi.E0
 	for i := 0; i < N; i++ {
 		ct.Value[0] -= (spi.TSK[i] * pk.B[i])
@@ -134,7 +135,8 @@ func EncWithPublicKey_tfheb(val uint32, pk PublicKey_tfheb) (ct tfhe.LWECipherte
 
 // Encrypt a value with public key, return with the information for zk-snarks
 func EncWithPublicKeyForZKSnarks_tfheb(val uint32, pk PublicKey_tfheb) (ct tfhe.LWECiphertext[uint32], spi SecretProveInfo_tfheb) {
-	g := csprng.NewGaussianSamplerTorus[uint32](pk.Params.LWEStdDev())
+	g1 := csprng.NewGaussianSamplerTorus[uint32](pk.Params.GLWEStdDev())
+	g2 := csprng.NewGaussianSamplerTorus[uint32](pk.Params.LWEStdDev())
 	ct = tfhe.NewLWECiphertext(pk.Params)
 	N := len(ct.Value) - 1
 	spi.TSK = make([]uint32, N)
@@ -145,8 +147,8 @@ func EncWithPublicKeyForZKSnarks_tfheb(val uint32, pk PublicKey_tfheb) (ct tfhe.
 	for i := 0; i < N; i++ {
 		spi.TSK[i] = uint32(rand.Intn(2))
 	}
-	spi.E1 = LimitSampleSlice_tfheb(g, N)
-	spi.E0 = LimitSample_tfheb(g)
+	spi.E1 = LimitSampleSlice_tfheb(g1, N)
+	spi.E0 = LimitSample_tfheb(g2)
 	if int32(spi.E0) < 0 {
 		spi.Quo[0] -= 1
 	}
@@ -181,24 +183,3 @@ func EncWithPublicKeyForZKSnarks_tfheb(val uint32, pk PublicKey_tfheb) (ct tfhe.
 	}
 	return
 }
-
-// // Save tfhe ciphertext
-// func SaveCiphertextb(ct tfhe.LWECiphertext[uint32], path, file_name string) {
-
-// 	os.Mkdir("../../../TFHE_Ciphertext_Trivium/", os.ModePerm)
-
-// 	var buf bytes.Buffer
-// 	ct.WriteTo(&buf)
-// 	os.WriteFile("../../../TFHE_Ciphertext_Trivium/"+file_name, buf.Bytes(), 0644)
-
-// }
-
-// // Read tfhe ciphertext
-// func ReadCiphertextb(params tfhe.Parameters[uint32], file_name string) (ct tfhe.LWECiphertext[uint32]) {
-// 	var buf bytes.Buffer
-// 	file, _ := os.ReadFile("../../../TFHE_Ciphertext_Trivium/" + file_name)
-// 	buf.Write(file)
-
-// 	ct.ReadFrom(&buf)
-// 	return
-// }

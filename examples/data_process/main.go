@@ -16,8 +16,11 @@ func main() {
 	codissymbol := flag.Bool("Codis", false, "Whether to generate the codis data")
 	codisencsymbol := flag.Bool("CodisEnc", false, "Whether to encrypt the codis data")
 	keysymbol := flag.Bool("GenKey", false, "Whether to generate the keys")
-	batchsize := flag.Int("BlockSize", 1, "BlockSize for the keys for zk-snarks")
+	blocksize := flag.Int("BlockSize", 1, "BlockSize for the keys for zk-snarks")
 	Hosted := flag.Bool("Hosted", false, "Whether to use hosted mode")
+	Path := flag.String("path", "../../..", "Target FilePath")
+
+	auxiliary.SavePath(*Path)
 
 	flag.Parse()
 
@@ -33,10 +36,10 @@ func main() {
 		}
 	}
 	if *codisencsymbol {
-		trivium.EncAndSaveCODIS_Trivium(*batchsize, *Hosted)
+		trivium.EncAndSaveCODIS_Trivium(*blocksize, *Hosted)
 	}
 	if *segsymbol {
-		trivium.EncryptAndSaveData(*batchsize, *Hosted)
+		trivium.EncryptAndSaveData(*Hosted)
 	}
 
 }

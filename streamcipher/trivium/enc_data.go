@@ -99,6 +99,22 @@ func DivideIntoSegments(people auxiliary.People) (Encoded_Variants [][]Variant) 
 		index := auxiliary.SegmentID(people, RSIDs[i], auxiliary.Seg_num)
 		Encoded_Variants[index] = append(Encoded_Variants[index], temp_variant)
 	}
+
+	for i := 0; i < auxiliary.Seg_num; i++ {
+		if len(Encoded_Variants[i]) < auxiliary.Minimal_Blocksize {
+			newEV := make([]Variant, auxiliary.Minimal_Blocksize)
+			for j := 0; j < auxiliary.Minimal_Blocksize; j++ {
+				if j < len(Encoded_Variants[i]) {
+					newEV[j] = Encoded_Variants[i][j]
+				} else {
+					var v Variant
+					newEV[j] = v
+				}
+			}
+			Encoded_Variants[i] = newEV
+
+		}
+	}
 	return
 }
 
@@ -124,26 +140,26 @@ func SegmentToStrings(seg_data [][]Variant, keyhash1, keyhash2 []byte, Indivname
 }
 
 // Encrypt the data with keyinfo, with option, if option == true, Hosted mode, else, each segment a key
-func Data_Enc(RawData [][]Variant, keyinfo1, keyinfo2 []byte, batch_size int, option bool) [][]Variant {
+func Data_Enc(RawData [][]Variant, keyinfo1, keyinfo2 []byte, option bool) [][]Variant {
 	Stream := make([][]Variant, auxiliary.Seg_num)
 
 	StreamKey1 := make([]int, 80)
 	StreamKey2 := make([]int, 80)
 
 	if option {
-		StreamKey1 = GenKeyHostedMode(keyinfo1, batch_size)
-		StreamKey2 = GenKeyHostedMode(keyinfo2, batch_size)
+		StreamKey1 = GenKeyHostedMode(keyinfo1, 1)
+	} else {
+		StreamKey2 = GenKeyHostedMode(keyinfo2, 1)
 	}
 
 	for i := 0; i < auxiliary.Seg_num; i++ {
 		if !option {
-			StreamKey1 = GenSegmentKey(keyinfo1, i, batch_size)
-			StreamKey2 = GenSegmentKey(keyinfo2, i, batch_size)
+			StreamKey1 = GenSegmentKey(keyinfo1, i, 1)
+		} else {
+			StreamKey2 = GenSegmentKey(keyinfo2, i, 1)
 		}
-		iv := make([]int, 80)
-		if option {
-			iv = GenIVHostedMode(i)
-		}
+
+		iv := GenIVHostedMode(i)
 
 		StreamKey := make([]int, 80)
 		for j := 0; j < 80; j++ {
@@ -177,31 +193,6 @@ func Data_Enc(RawData [][]Variant, keyinfo1, keyinfo2 []byte, batch_size int, op
 
 	return Ciphertext
 }
-
-// Generate Mimc hash on 288 bits trivium state
-// func GenFullHash(keyinfo []byte, batch_size int) [][]byte {
-// 	hash_full := make([][]byte, auxiliary.Seg_num)
-// 	iv := make([]int, 80)
-// 	for i := 0; i < auxiliary.Seg_num; i++ {
-// 		StreamKey := GenSegmentKey(keyinfo, i, batch_size)
-// 		var triv Trivium
-// 		triv.Init(StreamKey, iv)
-
-// 		temp1 := big.NewInt(0)
-// 		temp2 := big.NewInt(0)
-// 		lambda := big.NewInt(1)
-// 		for i := 0; i < 144; i++ {
-// 			temp1 = big.NewInt(1).Add(temp1, big.NewInt(1).Mul(lambda, big.NewInt(1).SetInt64(int64(triv.L[i]))))
-// 			temp2 = big.NewInt(1).Add(temp2, big.NewInt(1).Mul(lambda, big.NewInt(1).SetInt64(int64(triv.L[i+144]))))
-// 			lambda = big.NewInt(1).Mul(lambda, big.NewInt(2))
-// 		}
-// 		newbytes := auxiliary.PadBytes(temp1.Bytes(), auxiliary.Mimchashcurve.Size())
-// 		newbytes = append(newbytes, auxiliary.PadBytes(temp2.Bytes(), auxiliary.Mimchashcurve.Size())...)
-// 		hash_full[i], _ = auxiliary.MimcHashRaw(newbytes, auxiliary.Mimchashcurve)
-// 	}
-
-// 	return hash_full
-// }
 
 // Decrypt a segment with keyinfo
 func Seg_Dec(RawData []Variant, keyinfo []byte, segID int, batch_size int) []Variant {

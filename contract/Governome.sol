@@ -24,7 +24,7 @@ contract GenomeProcess{
     address QueryInitiator;
     address Hospital;
     address ComputingParty;
-    address ContractCreator = 0x16A433305B92d33a6454767A93c38a11d6a46De1;
+    address ContractCreator = 0x16A433305B92d33a6454767A93c38a11d6a46De1; // your address
 
     bool public inited = false;
     
@@ -52,7 +52,7 @@ contract GenomeProcess{
     event ComputingFinished(uint256 _reshash);
 
     function BoxID(string memory _nickname) public view returns (uint256) {
-        return uint256(keccak256(abi.encodePacked(_nickname, rsid))) % 120000;
+        return uint256(keccak256(abi.encodePacked(_nickname, rsid))) % 96000;
     }
 
     function Init(address _Hospital, address _ComputingParty) public {
