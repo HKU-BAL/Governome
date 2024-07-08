@@ -2,12 +2,16 @@
     <img src="docs/images/logo.png" width = "210" height = "190" alt="Governome_logo">
 </div>
 
-# Governome: An owner-governed genomic data management framework based on blockchain
+# Governome - Towards a new standard in genomic data privacy: a realization of owner-governance
 
+Contact: Ruibang Luo, Jingcheng Zhang  
+Email: rbluo@cs.hku.hk, zhangjc@connect.hku.hk  
+
+----
 
 ## Introduction
 
-Governome is the first owner-governed genomic data management framework based on blockchain, it designed to empower individuals with absolute control over their genomic data during data sharing.
+Governome is an owner-governed genomic data management system based on blockchain, it designed to empower individuals with absolute control over their genomic data during data sharing.
 
 This repository showcases the available applications of the current version of Governome, including data preprocessing for whole-genome data, population single variant queries, GWAS analysis, and a functional batch for identifying target individuals. Additionally, this repository demonstrates how Key Custodians upload information and provide proofs to participate in the workflow of Governome. 
 
