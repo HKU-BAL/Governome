@@ -24,15 +24,21 @@ All the homomorphical computation modules in Governome are based on the excellen
 * [Introduction](#introduction)
 * [Installation](#installation)
   * [Install go 1.21](#1-install-go-121)
-  * [Get Governome source code](https://github.com/HKU-BAL/Governome/tree/main?tab=readme-ov-file#2-get-governome-source-code)
-* [Data Preprocessing](https://github.com/HKU-BAL/Governome/tree/main?tab=readme-ov-file#data-preprocessing)
-* [Quick Start](https://github.com/HKU-BAL/Governome/tree/main?tab=readme-ov-file#quick-start)
-  + [Upload a SegKey and generating a proof](https://github.com/HKU-BAL/Governome/tree/main?tab=readme-ov-file#upload-a-segkey-and-generating-a-proof)
-  + [Individual variant query](https://github.com/HKU-BAL/Governome/tree/main?tab=readme-ov-file#individual-variant-query)
-  + [Cohort study](https://github.com/HKU-BAL/Governome/tree/main?tab=readme-ov-file#cohort-study)
-  + [Single SNP GWAS](https://github.com/HKU-BAL/Governome/tree/main?tab=readme-ov-file#single-snp-gwas)
-  + [Forensics](https://github.com/HKU-BAL/Governome/tree/main?tab=readme-ov-file#forensics)
-
+  * [Get Governome source code](#2-get-governome-source-code)
+* [Data Preprocessing](#data-preprocessing)
+* [Quick Start](#quick-start)
+  * [Upload a SegKey and generating a proof](#upload-a-segkey-and-generating-a-proof)
+  * [Individual variant query](#individual-variant-query)
+  * [Cohort study](#cohort-study)
+  * [Single SNP GWAS](#single-snp-gwas)
+  * [Forensics](#forensics)
+* [Usage](#usage)
+  * [Data Preprocessing](#data-preprocessing-1)
+  * [Upload a SegKey and generating a proof](#upload-a-segkey-and-generating-a-proof-1)
+  * [Individual variant query](#individual-variant-query-1)
+  * [Cohort study](#cohort-study-1)
+  * [Single SNP GWAS](#single-snp-gwas-1)
+  * [Forensics](forensics-1)
 
 ----
 
@@ -163,7 +169,7 @@ cd ../data_owner_query/
 go run main.go -Rsid ${Your Target rsID} -User ${DataOwner Name, e.g. HG00096}
 ```
 
-For the sake of demonstration, the parameters used here are highly insecure. If you wish to use secure parameters, please add the statement `-Toy=false`. If you have executed [b](https://github.com/HKU-BAL/Governome/blob/main/README.md#b-if-you-want-to-generate-all-proofs-and-ciphertexts-for-a-rsid-you-can-execute-the-following-command), you may also choose to add `-ReadKey` and `-Verify` to read and verify the proofs from a file.
+For the sake of demonstration, the parameters used here are highly insecure. If you wish to use secure parameters, please add the statement `-Toy=false`. If you have executed [b](#b-if-you-want-to-generate-all-proofs-and-ciphertexts-for-a-rsid-you-can-execute-the-following-command), you may also choose to add `-ReadKey` and `-Verify` to read and verify the proofs from a file.
 
 ### Cohort study
 
@@ -196,7 +202,7 @@ cd ../search_person/
 go run main.go -GroundTruth ${Your Target Person's ID, 0 ~ 2503}
 ```
 
-Here, you can use -GroundTruth to set the individuals of interest. If you do not wish to perform the query on individuals from the `1000 Genomes dataset`, you can set it to `-1`, and we will randomly generate such individuals for you. Similarly, you can set `-Toy=false` to use secure parameters, and add `-ReadKey` and `-Verify` to read and verify the proofs from a file if you have executed [c](https://github.com/HKU-BAL/Governome/blob/main/README.md#c-if-you-want-to-generate-all-proofs-and-ciphertexts-for-an-appid-you-can-execute-the-following-command).
+Here, you can use -GroundTruth to set the individuals of interest. If you do not wish to perform the query on individuals from the `1000 Genomes dataset`, you can set it to `-1`, and we will randomly generate such individuals for you. Similarly, you can set `-Toy=false` to use secure parameters, and add `-ReadKey` and `-Verify` to read and verify the proofs from a file if you have executed [c](#c-if-you-want-to-generate-all-proofs-and-ciphertexts-for-an-appid-you-can-execute-the-following-command).
 
 
 ## Usage
