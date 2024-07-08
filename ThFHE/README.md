@@ -1,5 +1,3 @@
 ## ThFHE in Governome
 
-In Governome, we have chosen homomorphic encryption as the computational meta-language. When a query is received, the Key Custodian encrypts the information using the provided public key and submits it. To prevent corruption, no one should possess the private key corresponding to the public key. Therefore, it is necessary to have a Secure Multi-Party computation organized by regulators to collaborate in generating the public key and the evaluation key used for subsequent computations. Such attemp is named as ThFHE.
-
-In the code example, we have provided a case of multi-party collaboration to generate the public key and evaluation key based on the modules offered by [mp-spdz](https://github.com/data61/MP-SPDZ). Please note that our code is merely a reference and is based on insecure Toy parameters.
+In Governome, we have chosen homomorphic encryption for secure computation. In the example code, we have provided a case of multi-party collaboration to generate the public key and evaluation key based on the modules offered by [mp-spdz](https://github.com/data61/MP-SPDZ). Please note that our code is merely a reference and is based on insecure [Toy parameters](https://github.com/HKU-BAL/Governome/blob/main/auxiliary/tfhe.go#L11).
