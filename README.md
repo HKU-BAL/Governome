@@ -21,9 +21,9 @@ All the homomorphical computation modules in Governome are based on the excellen
 
 ## Contents
 
-* [Introduction](https://github.com/HKU-BAL/Governome/tree/main?tab=readme-ov-file#introduction)
-* [Installation](https://github.com/HKU-BAL/Governome/tree/main?tab=readme-ov-file#installation)
-  * [Install go 1.21](https://github.com/HKU-BAL/Governome/tree/main?tab=readme-ov-file#1-install-go-121)
+* [Introduction](#introduction)
+* [Installation](#installation)
+  * [Install go 1.21](#1-install-go-121)
   * [Get Governome source code](https://github.com/HKU-BAL/Governome/tree/main?tab=readme-ov-file#2-get-governome-source-code)
 * [Data Preprocessing](https://github.com/HKU-BAL/Governome/tree/main?tab=readme-ov-file#data-preprocessing)
 * [Quick Start](https://github.com/HKU-BAL/Governome/tree/main?tab=readme-ov-file#quick-start)
