@@ -222,7 +222,7 @@ Here, you can use -GroundTruth to set the individuals of interest. If you do not
     	Begin ID when generate all (default 2504)
 ```
 
-### User query
+### Individual variant query
 
 #### Usage of ./example/data_owner_query/main.go:
 
@@ -239,7 +239,7 @@ Here, you can use -GroundTruth to set the individuals of interest. If you do not
     	Whether verifying the proofs
 ```
 
-### Single SNP Query
+### Cohort study
 
 #### Usage of ./example/querySingleSnp/main.go:
 
@@ -273,7 +273,7 @@ Here, you can use -GroundTruth to set the individuals of interest. If you do not
     	Whether verifying the proofs
 ```
 
-### Search Person
+### Forensics
 
 #### Usage of ./example/search_person/main.go:
 
