@@ -31,7 +31,7 @@ func GWAS(Parameter tfhe.ParametersLiteral[uint32], rsid string, population stri
 	}
 
 	WholeIndivs := auxiliary.ReadIndividuals()
-	Indiv, _, Phenotype, _ := applications.ReadPhenotype(WholeIndivs, population)
+	Indiv, _, _, Phenotype := applications.ReadPhenotype(WholeIndivs, population)
 
 	Phenotype_Ciphertext := make([]trivium.BigValueCiphertext, len(Indiv))
 	for i := 0; i < len(Phenotype_Ciphertext); i++ {
