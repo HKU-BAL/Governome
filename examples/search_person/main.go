@@ -15,7 +15,7 @@ import (
 	"github.com/sp301415/tfhe-go/tfhe"
 )
 
-func Boolean_Search(query_target applications.CODIS, Parameter tfhe.ParametersLiteral[uint32], Readsymbol bool, Verifysymbol bool, option bool, dicpath string) {
+func Boolean_Search(query_target applications.CODIS, Parameter tfhe.ParametersLiteral[uint32], Readsymbol bool, Verifysymbol bool, option bool) {
 	params := Parameter.Compile()
 
 	enc := tfhe.NewBinaryEncryptor(params)
@@ -95,12 +95,11 @@ func Boolean_Search(query_target applications.CODIS, Parameter tfhe.ParametersLi
 
 func main() {
 
-	toy := flag.Bool("Toy", true, "Whether using Toy Parameters")
-	GroundTruthID := flag.Int("GroundTruth", 0, "GroundTruthID")
-	readsymbol := flag.Bool("ReadKey", false, "Whether read Data from file, not suitable for toy params")
-	verifysymbol := flag.Bool("Verify", false, "Whether verifying the proofs")
-	Hosted := flag.Bool("Hosted", false, "Whether to use hosted mode")
-	Path := flag.String("path", "../../..", "Target FilePath")
+	toy := flag.Bool("toy", true, "Whether using Toy Parameters")
+	GroundTruthID := flag.Int("groundtruth", 0, "GroundTruthID in 1kGP")
+	readsymbol := flag.Bool("read", false, "Whether read Data from file, not suitable for toy params")
+	verifysymbol := flag.Bool("verify", false, "Whether verifying the proofs")
+	Hosted := flag.Bool("precomputed", false, "Whether owner choose to precompute the access token")
 	flag.Parse()
 
 	var query_target applications.CODIS
@@ -111,9 +110,9 @@ func main() {
 	}
 
 	if *toy {
-		Boolean_Search(query_target, auxiliary.ParamsToyBoolean, *readsymbol, *verifysymbol, *Hosted, *Path)
+		Boolean_Search(query_target, auxiliary.ParamsToyBoolean, *readsymbol, *verifysymbol, *Hosted)
 	} else {
-		Boolean_Search(query_target, tfhe.ParamsBinaryOriginal, *readsymbol, *verifysymbol, *Hosted, *Path)
+		Boolean_Search(query_target, tfhe.ParamsBinaryOriginal, *readsymbol, *verifysymbol, *Hosted)
 	}
 
 }

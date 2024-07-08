@@ -212,18 +212,21 @@ Here, you can use -GroundTruth to set the individuals of interest. If you do not
 #### Usage of ./example/data_process/main.go:
 
 ```
-  -BlockSize int
-    	BlockSize for the keys for zk-snarks (default 1)
-  -Codis
-    	Whether to generate the codis data
-  -CodisEnc
-    	Whether to encrypt the codis data
-  -GenKey
+  -genkey
     	Whether to generate the keys
-  -Segment
+  -path string
+    	Root FilePath (default "../../..")
+  -precomputed
+    	Whether owner choose to precompute the access token
+  -seg
     	Whether to preprocess the data to segments
-  -Toy
-    	Whether using Toy Parameters
+  -str
+    	Whether to generate the str data
+  -strenc
+    	Whether to encrypt the str data
+  -toy
+    	Whether using Toy Parameters (default true)
+
 ```
 
 ### Upload a SegKey and generating a proof
@@ -231,20 +234,23 @@ Here, you can use -GroundTruth to set the individuals of interest. If you do not
 #### Usage of ./example/user_proof/main.go:
 
 ```
-  -APPID int
-    	AppID for all individual (default -1)
-  -All
+  -all
     	Whether include all Individuals
-  -ID int
-    	1 or 2, different key custodians (default 1)
-  -Rsid string
-    	Target Site (default "rs6053810")
-  -User string
-    	User Name (default "HG00096")
   -begin int
     	Begin ID when generate all
   -end int
     	Begin ID when generate all (default 2504)
+  -id int
+    	1 or 2, 1 for owners, 2 for hospitals (default 1)
+  -precomputed
+    	Whether owner choose to precompute the access token
+  -rsid string
+    	Target Site in rsID (default "rs6053810")
+  -segID int
+    	AppID or SegID for all individual (default -1)
+  -user string
+    	User Name in 1kGP (default "HG00096")
+
 ```
 
 ### Individual variant query
@@ -252,16 +258,19 @@ Here, you can use -GroundTruth to set the individuals of interest. If you do not
 #### Usage of ./example/data_owner_query/main.go:
 
 ```
-  -ReadKey
+  -precomputed
+    	Whether owner choose to precompute the access token
+  -read
     	Whether read Data from file, not suitable for toy params
-  -Rsid string
-    	Target Site (default "rs6053810")
-  -Toy
+  -rsid string
+    	Target Site in rsID (default "rs6053810")
+  -toy
     	Whether using Toy Parameters (default true)
-  -User string
-    	Data Owner Nickname (default "HG00096")
-  -Verify
+  -user string
+    	User Name in 1kGP (default "HG00096")
+  -verify
     	Whether verifying the proofs
+
 ```
 
 ### Cohort study
@@ -269,16 +278,19 @@ Here, you can use -GroundTruth to set the individuals of interest. If you do not
 #### Usage of ./example/querySingleSnp/main.go:
 
 ```
-  -Population string
-    	Population, in 'AFR', 'AMR', 'EAS', 'EUR', 'SAS' (default "EUR")
-  -ReadKey
+  -cohort string
+    	Population, in 'AFR', 'AMR', 'EAS', 'EUR', 'SAS', 'ALL' (default "ALL")
+  -precomputed
+    	Whether owner choose to precompute the access token
+  -read
     	Whether read Data from file, not suitable for toy params
-  -Rsid string
-    	Target Site (default "rs6053810")
-  -Toy
+  -rsid string
+    	Target Site in rsID (default "rs6053810")
+  -toy
     	Whether using Toy Parameters (default true)
-  -Verify
+  -verify
     	Whether verifying the proofs
+
 ```
 
 ### Single SNP GWAS
@@ -286,16 +298,19 @@ Here, you can use -GroundTruth to set the individuals of interest. If you do not
 #### Usage of ./example/gwas/main.go:
 
 ```
-  -Population string
+  -cohort string
     	Population, in 'AFR', 'AMR', 'EAS', 'EUR', 'SAS' (default "EUR")
-  -ReadKey
+  -precomputed
+    	Whether owner choose to precompute the access token
+  -read
     	Whether read Data from file, not suitable for toy params
-  -Rsid string
-    	Target Site (default "rs6053810")
-  -Toy
+  -rsid string
+    	Target Site in rsID (default "rs6053810")
+  -toy
     	Whether using Toy Parameters (default true)
-  -Verify
+  -verify
     	Whether verifying the proofs
+
 ```
 
 ### Forensics
@@ -303,13 +318,16 @@ Here, you can use -GroundTruth to set the individuals of interest. If you do not
 #### Usage of ./example/search_person/main.go:
 
 ```
-  -GroundTruth int
-    	GroundTruthID
-  -ReadKey
+  -groundtruth int
+    	GroundTruthID in 1kGP
+  -precomputed
+    	Whether owner choose to precompute the access token
+  -read
     	Whether read Data from file, not suitable for toy params
-  -Toy
+  -toy
     	Whether using Toy Parameters (default true)
-  -Verify
+  -verify
     	Whether verifying the proofs
+
 ```
 

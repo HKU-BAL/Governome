@@ -11,14 +11,13 @@ import (
 
 func main() {
 
-	toy := flag.Bool("Toy", false, "Whether using Toy Parameters")
-	segsymbol := flag.Bool("Segment", false, "Whether to preprocess the data to segments")
-	codissymbol := flag.Bool("Codis", false, "Whether to generate the codis data")
-	codisencsymbol := flag.Bool("CodisEnc", false, "Whether to encrypt the codis data")
-	keysymbol := flag.Bool("GenKey", false, "Whether to generate the keys")
-	blocksize := flag.Int("BlockSize", 1, "BlockSize for the keys for zk-snarks")
-	Hosted := flag.Bool("Hosted", false, "Whether to use hosted mode")
-	Path := flag.String("path", "../../..", "Target FilePath")
+	toy := flag.Bool("toy", true, "Whether using Toy Parameters")
+	segsymbol := flag.Bool("seg", false, "Whether to preprocess the data to segments")
+	codissymbol := flag.Bool("str", false, "Whether to generate the str data")
+	codisencsymbol := flag.Bool("strenc", false, "Whether to encrypt the str data")
+	keysymbol := flag.Bool("genkey", false, "Whether to generate the keys")
+	Hosted := flag.Bool("precomputed", false, "Whether owner choose to precompute the access token")
+	Path := flag.String("path", "../../..", "Root FilePath")
 
 	auxiliary.SavePath(*Path)
 
@@ -36,7 +35,7 @@ func main() {
 		}
 	}
 	if *codisencsymbol {
-		trivium.EncAndSaveCODIS_Trivium(*blocksize, *Hosted)
+		trivium.EncAndSaveCODIS_Trivium(*Hosted)
 	}
 	if *segsymbol {
 		trivium.EncryptAndSaveData(*Hosted)

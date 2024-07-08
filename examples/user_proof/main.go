@@ -35,14 +35,14 @@ func GenAllProofForSpecificAPPID(appid int, begin, end int, option bool) {
 }
 
 func main() {
-	rsid := flag.String("Rsid", "rs6053810", "Target Site")
-	Username := flag.String("User", "HG00096", "User Name")
-	keyholderID := flag.Int("ID", 1, "1 or 2, different key custodians")
-	appid := flag.Int("APPID", -1, "AppID for all individual")
+	rsid := flag.String("rsid", "rs6053810", "Target Site in rsID")
+	Username := flag.String("user", "HG00096", "User Name in 1kGP")
+	keyholderID := flag.Int("id", 1, "1 or 2, 1 for owners, 2 for hospitals")
+	appid := flag.Int("segID", -1, "AppID or SegID for all individual")
 	begin := flag.Int("begin", 0, "Begin ID when generate all")
 	end := flag.Int("end", 2504, "Begin ID when generate all")
-	Genall := flag.Bool("All", false, "Whether include all Individuals")
-	Hosted := flag.Bool("Hosted", false, "Whether to use hosted mode")
+	Genall := flag.Bool("all", false, "Whether include all Individuals")
+	Hosted := flag.Bool("precomputed", false, "Whether owner choose to precompute the access token")
 
 	flag.Parse()
 	if *Genall {

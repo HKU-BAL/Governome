@@ -90,12 +90,12 @@ func Queryuser_Boolen(Parameter tfhe.ParametersLiteral[uint32], user_name, rsid 
 }
 
 func main() {
-	rsid := flag.String("Rsid", "rs6053810", "Target Site")
-	user_name := flag.String("User", "HG00096", "Data Owner Nickname")
-	toy := flag.Bool("Toy", true, "Whether using Toy Parameters")
-	readsymbol := flag.Bool("ReadKey", false, "Whether read Data from file, not suitable for toy params")
-	verifysymbol := flag.Bool("Verify", false, "Whether verifying the proofs")
-	Hosted := flag.Bool("Hosted", false, "Whether to use hosted mode")
+	rsid := flag.String("rsid", "rs6053810", "Target Site in rsID")
+	user_name := flag.String("user", "HG00096", "User Name in 1kGP")
+	toy := flag.Bool("toy", true, "Whether using Toy Parameters")
+	readsymbol := flag.Bool("read", false, "Whether read Data from file, not suitable for toy params")
+	verifysymbol := flag.Bool("verify", false, "Whether verifying the proofs")
+	Hosted := flag.Bool("precomputed", false, "Whether owner choose to precompute the access token")
 	flag.Parse()
 
 	if *toy {

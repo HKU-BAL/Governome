@@ -95,12 +95,12 @@ func GWAS(Parameter tfhe.ParametersLiteral[uint32], rsid string, population stri
 
 func main() {
 
-	rsid := flag.String("Rsid", "rs6053810", "Target Site")
-	population := flag.String("Population", "EUR", "Population, in 'AFR', 'AMR', 'EAS', 'EUR', 'SAS'")
-	toy := flag.Bool("Toy", true, "Whether using Toy Parameters")
-	readsymbol := flag.Bool("ReadKey", false, "Whether read Data from file, not suitable for toy params")
-	verifysymbol := flag.Bool("Verify", false, "Whether verifying the proofs")
-	Hosted := flag.Bool("Hosted", false, "Whether to use hosted mode")
+	rsid := flag.String("rsid", "rs6053810", "Target Site in rsID")
+	population := flag.String("cohort", "EUR", "Population, in 'AFR', 'AMR', 'EAS', 'EUR', 'SAS'")
+	toy := flag.Bool("toy", true, "Whether using Toy Parameters")
+	readsymbol := flag.Bool("read", false, "Whether read Data from file, not suitable for toy params")
+	verifysymbol := flag.Bool("verify", false, "Whether verifying the proofs")
+	Hosted := flag.Bool("precomputed", false, "Whether owner choose to precompute the access token")
 	flag.Parse()
 
 	if *toy {

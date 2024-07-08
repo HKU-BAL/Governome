@@ -148,16 +148,16 @@ func Decode_CODIS(cod []CODIS) []applications.CODIS {
 }
 
 // Encrypt the CODIS data
-func XOR_CODIS(cod CODIS, keyinfo1, keyinfo2 []byte, batch_size int, option bool) CODIS {
+func XOR_CODIS(cod CODIS, keyinfo1, keyinfo2 []byte, option bool) CODIS {
 
 	var StreamKey1, StreamKey2, iv []int
 
 	if option {
-		StreamKey1 = GenKeyHostedMode(keyinfo1, batch_size)
-		StreamKey2 = GenSegmentKey(keyinfo2, applications.App_id_SearchPerson, batch_size)
+		StreamKey1 = GenKeyHostedMode(keyinfo1, 1)
+		StreamKey2 = GenSegmentKey(keyinfo2, applications.App_id_SearchPerson, 1)
 	} else {
-		StreamKey1 = GenSegmentKey(keyinfo1, applications.App_id_SearchPerson, batch_size)
-		StreamKey2 = GenKeyHostedMode(keyinfo2, batch_size)
+		StreamKey1 = GenSegmentKey(keyinfo1, applications.App_id_SearchPerson, 1)
+		StreamKey2 = GenKeyHostedMode(keyinfo2, 1)
 	}
 
 	iv = GenIVHostedMode(applications.App_id_SearchPerson)
@@ -183,7 +183,7 @@ func XOR_CODIS(cod CODIS, keyinfo1, keyinfo2 []byte, batch_size int, option bool
 }
 
 // Encrypt the CODIS Data and Save it
-func EncAndSaveCODIS_Trivium(batch_size int, option bool) {
+func EncAndSaveCODIS_Trivium(option bool) {
 	now := time.Now()
 	dicpath := auxiliary.ReadPath()
 	os.MkdirAll(dicpath+"/EncSTR", os.ModePerm)
@@ -204,7 +204,7 @@ func EncAndSaveCODIS_Trivium(batch_size int, option bool) {
 		keyinfo2, keyhash2 := GenerateRawKey(Indivs[i], 2)
 		keyhashset1[i] = "Hash1: " + big.NewInt(1).SetBytes(keyhash1).String()
 		keyhashset2[i] = "Hash2: " + big.NewInt(1).SetBytes(keyhash2).String()
-		enc_cods[i] = XOR_CODIS(cods[i], keyinfo1, keyinfo2, batch_size, option)
+		enc_cods[i] = XOR_CODIS(cods[i], keyinfo1, keyinfo2, option)
 	}
 	new_data := Decode_CODIS(enc_cods)
 

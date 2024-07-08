@@ -232,7 +232,12 @@ func ReadSegKey(people auxiliary.People, keyholder int, params tfhe.Parameters[u
 
 func UserProof(WhetherSave bool, people auxiliary.People, keyholder int, segID int, option bool) {
 
-	ccs := GenorReadR1CS(WhetherSave, option)
+	var ccs constraint.ConstraintSystem
+	if keyholder == 1 {
+		ccs = GenorReadR1CS(WhetherSave, option)
+	} else {
+		ccs = GenorReadR1CS(WhetherSave, !option)
+	}
 
 	ProveKey, VerifyKey := GenorReadSetup(ccs, WhetherSave, option)
 
@@ -243,9 +248,19 @@ func UserProof(WhetherSave bool, people auxiliary.People, keyholder int, segID i
 	var publicWitness []witness.Witness
 
 	if option {
-		segkey, proof, publicWitness = EncStreamWithPublicKeyWithProveTFHE_Hosted(keyinfo, &ccs, ProveKey)
+		if keyholder == 1 {
+			segkey, proof, publicWitness = EncStreamWithPublicKeyWithProveTFHE_Hosted(keyinfo, &ccs, ProveKey)
+		} else {
+			segkey, proof, publicWitness = EncStreamWithPublicKeyWithProveTFHE_Boolean(keyinfo, segID, &ccs, ProveKey)
+		}
+
 	} else {
-		segkey, proof, publicWitness = EncStreamWithPublicKeyWithProveTFHE_Boolean(keyinfo, segID, &ccs, ProveKey)
+		if keyholder == 1 {
+			segkey, proof, publicWitness = EncStreamWithPublicKeyWithProveTFHE_Boolean(keyinfo, segID, &ccs, ProveKey)
+		} else {
+			segkey, proof, publicWitness = EncStreamWithPublicKeyWithProveTFHE_Hosted(keyinfo, &ccs, ProveKey)
+		}
+
 	}
 
 	if WhetherSave {
