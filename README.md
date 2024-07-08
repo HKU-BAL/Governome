@@ -13,7 +13,7 @@ Email: rbluo@cs.hku.hk, zhangjc@connect.hku.hk
 
 Governome is an owner-governed genomic data management system based on blockchain, it designed to empower individuals with absolute control over their genomic data during data sharing.
 
-This repository showcases the available applications of the current version of Governome, including data preprocessing for whole-genome data, population single variant queries, GWAS analysis, and a functional batch for identifying target individuals. Additionally, this repository demonstrates how Key Custodians upload information and provide proofs to participate in the workflow of Governome. 
+This repository showcases the available applications of the current version of Governome, including data preprocessing for whole-genome data, individual variant query, cohort study, GWAS analysis, and forensics. Additionally, this repository demonstrates how data owners and hospitals upload information and provide proofs to participate in the workflow of Governome. 
 
 All the homomorphical computation modules in Governome are based on the excellent library [tfhe-go](https://github.com/sp301415/tfhe-go), and all the zk-SNARKs modules in Governome are based on [gnark](https://github.com/Consensys/gnark/tree/master).
 
@@ -66,20 +66,22 @@ cd Governome
 Governome_DIR=$(pwd)
 ```
 
-We advise to organize the data in the following way to ensure the efficiency of accessing and processing data:
+We advise to create a root folder and organize the data in the following way to ensure the efficiency of accessing and processing data:
 
 ```
 Governome_RootFolder/
-    ├── Governome/
     ├── Plaintext_Data/
     ├── Individuals/
     ├── Phenotype/
+    ├── Segments_Enc_Data/
     └── ...
 ```
 
+Here you need to update the [defaultPath](https://github.com/HKU-BAL/Governome/blob/main/defaultPath) for the root folder.
+
 ## Data Preprocessing
 
-In Governome, we process whole-genome data based on VCF (Variant Call Format) files. Specifically, considering that the original VCF files can be overly cumbersome, we provide a simplified version that only retains the rsID and genotype columns. You can download this simplified data [here](http://www.bio8.cs.hku.hk/governome/Plaintext_Data/). If you find the whole-genome data too large, you can download a simplified version based on `chromosome 20` from **here([TBU]())**. Please note that, at this moment, modify the `Seg_num` in `./auxiliary/params.go` to `2048`.
+In Governome, we process whole-genome data based on VCF (Variant Call Format) files. Specifically, considering that the original VCF files can be overly cumbersome, we provide a simplified version that only retains the rsID and genotype columns. You can download this simplified data [here](http://www.bio8.cs.hku.hk/governome/Plaintext_Data/) or the preprocessed version [here](http://www.bio8.cs.hku.hk/governome/Segments_Enc_Data/). If you find the whole-genome data too large, you can download a simplified version based on `chromosome 20` from [here](http://www.bio8.cs.hku.hk/governome/chr20/Plaintext_Data/). Please note that, at this moment, modify the `Seg_num` in `./auxiliary/params.go` to `1024` or `2048`.
 
 In Governome, data is stored in encrypted form. To encrypt the raw data, you need to run the following command:
 
@@ -87,7 +89,7 @@ In Governome, data is stored in encrypted form. To encrypt the raw data, you nee
 cd ${Governome_DIR}/examples/data_process/
 go run main.go -Segment
 
-# the raw data is available at ${Governome_DIR}/../Segments_Enc_Data_Trivium
+# the raw data is available at ${Governome_DIR}/../Segments_Enc_Data
 ```
 
 Since the `1000 Genomes dataset` does not provide short tandem repeat loci, we have chosen to randomly generate this data for the `2504` individuals and encrypt it. Here is an example code:
