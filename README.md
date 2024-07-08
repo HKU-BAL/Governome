@@ -79,7 +79,7 @@ Governome_RootFolder/
 
 ## Data Preprocessing
 
-In Governome, we process whole-genome data based on VCF (Variant Call Format) files. Specifically, considering that the original VCF files can be overly cumbersome, we provide a simplified version that only retains the rsID and genotype columns. You can download this simplified data **here(TBU)**. If you find the whole-genome data too large, you can download a simplified version based on `chromosome 20` from **here(TBU)**. Please note that, at this moment, modify the `Seg_num` in `./auxiliary/params.go` to `2048`.
+In Governome, we process whole-genome data based on VCF (Variant Call Format) files. Specifically, considering that the original VCF files can be overly cumbersome, we provide a simplified version that only retains the rsID and genotype columns. You can download this simplified data [here](http://www.bio8.cs.hku.hk/governome/Plaintext_Data/). If you find the whole-genome data too large, you can download a simplified version based on `chromosome 20` from **here([TBU]())**. Please note that, at this moment, modify the `Seg_num` in `./auxiliary/params.go` to `2048`.
 
 In Governome, data is stored in encrypted form. To encrypt the raw data, you need to run the following command:
 
