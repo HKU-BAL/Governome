@@ -17,6 +17,25 @@ This repository showcases the available applications of the current version of G
 
 All the homomorphical computation modules in Governome are based on the excellent library [tfhe-go](https://github.com/sp301415/tfhe-go), and all the zk-SNARKs modules in Governome are based on [gnark](https://github.com/Consensys/gnark/tree/master).
 
+----
+
+## Contents
+
+* [Introduction](https://github.com/HKU-BAL/Governome/tree/main?tab=readme-ov-file#introduction)
+* [Installation](https://github.com/HKU-BAL/Governome/tree/main?tab=readme-ov-file#installation)
+  * [Install go 1.21](https://github.com/HKU-BAL/Governome/tree/main?tab=readme-ov-file#1-install-go-121)
+  * [Get Governome source code](https://github.com/HKU-BAL/Governome/tree/main?tab=readme-ov-file#2-get-governome-source-code)
+* [Data Preprocessing](https://github.com/HKU-BAL/Governome/tree/main?tab=readme-ov-file#data-preprocessing)
+* [Quick Start](https://github.com/HKU-BAL/Governome/tree/main?tab=readme-ov-file#quick-start)
+  + [Upload a SegKey and generating a proof](https://github.com/HKU-BAL/Governome/tree/main?tab=readme-ov-file#upload-a-segkey-and-generating-a-proof)
+  + [Individual variant query](https://github.com/HKU-BAL/Governome/tree/main?tab=readme-ov-file#individual-variant-query)
+  + [Cohort study](https://github.com/HKU-BAL/Governome/tree/main?tab=readme-ov-file#cohort-study)
+  + [Single SNP GWAS](https://github.com/HKU-BAL/Governome/tree/main?tab=readme-ov-file#single-snp-gwas)
+  + [Forensics](https://github.com/HKU-BAL/Governome/tree/main?tab=readme-ov-file#forensics)
+
+
+----
+
 ## Installation
 
 ### 1. Install go 1.21
