@@ -202,7 +202,7 @@ cd ../search_person/
 go run main.go -GroundTruth ${Your Target Person's ID, 0 ~ 2503}
 ```
 
-Here, you can use -GroundTruth to set the individuals of interest. If you do not wish to perform the query on individuals from the `1000 Genomes dataset`, you can set it to `-1`, and we will randomly generate such individuals for you. Similarly, you can set `-Toy=false` to use secure parameters, and add `-ReadKey` and `-Verify` to read and verify the proofs from a file if you have executed [c](#c-if-you-want-to-generate-all-proofs-and-ciphertexts-for-an-appid-you-can-execute-the-following-command).
+Here, you can use -GroundTruth to set the individuals of interest. If you do not wish to perform the query on individuals from the `1000 Genomes dataset`, you can set it to `-1`, and we will randomly generate such individuals for you. Similarly, you can set `-Toy=false` to use secure parameters, and add `-ReadKey` and `-Verify` to read and verify the proofs from a file if you have executed [c](#c-if-you-want-to-generate-all-proofs-and-ciphertexts-for-an-appid-or-a-segid-you-can-execute-the-following-command).
 
 
 ## Usage
