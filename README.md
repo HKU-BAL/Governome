@@ -83,13 +83,13 @@ Here you need to update the [defaultPath](https://github.com/HKU-BAL/Governome/b
 
 In Governome, we process whole-genome data based on VCF (Variant Call Format) files. Specifically, considering that the original VCF files can be overly cumbersome, we provide a simplified version that only retains the rsID and genotype columns. You can download this simplified data [here](http://www.bio8.cs.hku.hk/governome/Plaintext_Data/) or the preprocessed version [here](http://www.bio8.cs.hku.hk/governome/Segments_Enc_Data/). If you find the whole-genome data too large, you can download a simplified version based on `chromosome 20` from [here](http://www.bio8.cs.hku.hk/governome/chr20/Plaintext_Data/). Please note that, at this moment, modify the `Seg_num` in `./auxiliary/params.go` to `1024` or `2048`.
 
-In Governome, data is stored in encrypted form. To encrypt the raw data, you need to run the following command:
+In Governome, data is stored in encrypted form. If you have already downloaded the preprocessed data, please ignore this step. To encrypt the raw data, you need to run the following command:
 
 ```
 cd ${Governome_DIR}/examples/data_process/
 go run main.go -Segment
 
-# the raw data is available at ${Governome_DIR}/../Segments_Enc_Data
+# the raw data is available at ${Governome_RootFolder}/Segments_Enc_Data
 ```
 
 Since the `1000 Genomes dataset` does not provide short tandem repeat loci, we have chosen to randomly generate this data for the `2504` individuals and encrypt it. Here is an example code:
@@ -106,13 +106,13 @@ cd ${Governome_DIR}/examples/data_process/
 go run main.go -GenKey
 ```
 
-If necessary, you can modify the `-BlockSize` parameter to select a larger block setting. Considering the memory limitations of the user, the `-BlockSize` for the stream cipher key is set to `1` by default. Additionally, you can modify the `Seg_num` in `./auxiliary/params.go` to set a different number of segments.
+If you want to see how multi-parties collaboratively generating the public key and evaluation key in ThFHE, you can turn to [here](https://github.com/HKU-BAL/Governome/tree/main/ThFHE) for a Simple Demo.
 
 ## Quick Start
 
 ### Upload a SegKey and generating a proof
 
-This module demonstrates how, as a Key Custodian, you will generate the ciphertext and zero-knowledge proofs that need to be submitted for a transaction. Please ensure that you have executed the corresponding command for generating the public and private key pair for TFHE.
+This module demonstrates how, as a data owner, you will generate the ciphertext and zero-knowledge proofs that need to be submitted for a query. Please ensure that you have executed the corresponding command for generating the public and private key pair for TFHE.
 
 #### a. If you are interested in observing how zero-knowledge proofs are generated, please execute the following command:
 
@@ -127,7 +127,7 @@ go run main.go -Rsid ${Your Target rsID} -User ${DataOwner Name, e.g. HG00096} -
 go run main.go -All -Rsid ${Your Target rsID} 
 ```
 
-#### c. If you want to generate all proofs and ciphertexts for an appID, you can execute the following command:
+#### c. If you want to generate all proofs and ciphertexts for an appID or a segID, you can execute the following command:
 
 ```
 go run main.go -All -APPID ${Your Target appID} 
@@ -135,7 +135,7 @@ go run main.go -All -APPID ${Your Target appID}
 
 Noted that b and c are prepared for subsequent demonstrations, which take time. If you simply want to experience the full functionality of Governome, please ignore them.
 
-### User query
+### Individual variant query
 
 As a Data Owner, you are highly interested in your own genotype data. To fulfill this, you can initiate a query to Governome to gain insights into your health condition. Governome provides a module specifically designed for this purpose. You can use the following command to perform the query:
 
