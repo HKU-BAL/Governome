@@ -146,7 +146,7 @@ go run main.go -Rsid ${Your Target rsID} -User ${DataOwner Name, e.g. HG00096}
 
 For the sake of demonstration, the parameters used here are highly insecure. If you wish to use secure parameters, please add the statement `-Toy=false`. If you have executed [b](https://github.com/HKU-BAL/Governome/blob/main/README.md#b-if-you-want-to-generate-all-proofs-and-ciphertexts-for-a-rsid-you-can-execute-the-following-command), you may also choose to add `-ReadKey` and `-Verify` to read and verify the proofs from a file.
 
-### Single SNP Query
+### Cohort study
 
 As the head of a pharmaceutical company, you and your team intend to develop a new drug based on a specific target SNP. However, you are uncertain about the true correlation between the target and the disease over a specific population. In this regard, you can initiate a distribution query to Governome regarding this target. The command is as follows:
 
@@ -155,7 +155,7 @@ cd ../querySingleSnp/
 go run main.go -Rsid ${Your Target rsID} -Population ${Your interested population, e.g. EUR}
 ```
 
-And you will obtain the result you are interested in. Similarly, you can set `-Toy=false` to use secure parameters, and add `-ReadKey` and `-Verify` to read and verify the proofs from a file.
+And you will obtain the result of how the distribution of different genotypes. Similarly, you can set `-Toy=false` to use secure parameters, and add `-ReadKey` and `-Verify` to read and verify the proofs from a file.
 
 ### Single SNP GWAS
 
@@ -166,7 +166,7 @@ cd ../gwas/
 go run main.go -Rsid ${Your Target rsID} -Population ${Your interested population, e.g. EUR}
 ```
 
-Noted that the the Phenotype comes from Hail, you can download it here. The default Phenotype is PurpleHair. If you want to change it, you can modify the Phenotype file by yourself. Similarly, you can set `-Toy=false` to use secure parameters, and add `-ReadKey` and `-Verify` to read and verify the proofs from a file.
+Noted that the the Phenotype comes from Hail, you can download it [here](http://www.bio8.cs.hku.hk/governome/Phenotype/). The default Phenotype is CaffeineConsumption. If you want to change it, you can modify the Phenotype file by yourself. Similarly, you can set `-Toy=false` to use secure parameters, and add `-ReadKey` and `-Verify` to read and verify the proofs from a file.
 
 ### Search Person (individual-by-individual genotype analysis)
 
