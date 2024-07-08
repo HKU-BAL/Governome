@@ -72,7 +72,7 @@ func ReadPhenotype(IndivLimit []auxiliary.People, Population string) ([]auxiliar
 		}
 
 		val, _ := strconv.Atoi(fields[5])
-		if val >= 4 {
+		if val > 4 {
 			val = 1
 		} else {
 			val = 0
