@@ -81,7 +81,7 @@ Here you need to update the [defaultPath](https://github.com/HKU-BAL/Governome/b
 
 ## Data Preprocessing
 
-In Governome, we process whole-genome data based on VCF (Variant Call Format) files. Specifically, considering that the original VCF files can be overly cumbersome, we provide a simplified version that only retains the rsID and genotype columns. You can download this simplified data [here](http://www.bio8.cs.hku.hk/governome/Plaintext_Data/) or the preprocessed version [here](http://www.bio8.cs.hku.hk/governome/Segments_Enc_Data/). If you find the whole-genome data too large, you can download a simplified version based on `chromosome 20` from [here](http://www.bio8.cs.hku.hk/governome/chr20/Plaintext_Data/). Please note that, at this moment, modify the `Seg_num` in `./auxiliary/params.go` to `1024` or `2048`.
+In Governome, we process whole-genome data based on VCF (Variant Call Format) files. We have chosen `1000 Genomes dataset` for benchmarking, and you can download the individual list [here](http://www.bio8.cs.hku.hk/governome/Individuals/). Specifically, considering that the original VCF files can be overly cumbersome, we provide a simplified version that only retains the rsID and genotype columns. You can download this simplified data [here](http://www.bio8.cs.hku.hk/governome/Plaintext_Data/) or the preprocessed version [here](http://www.bio8.cs.hku.hk/governome/Segments_Enc_Data/). If you find the whole-genome data too large, you can download a simplified version based on `chromosome 20` from [here](http://www.bio8.cs.hku.hk/governome/chr20/Plaintext_Data/). Please note that, at this moment, modify the `Seg_num` in `./auxiliary/params.go` to `1024` or `2048`.
 
 In Governome, data is stored in encrypted form. If you have already downloaded the preprocessed data, please ignore this step. To encrypt the raw data, you need to run the following command:
 
@@ -168,9 +168,9 @@ go run main.go -Rsid ${Your Target rsID} -Population ${Your interested populatio
 
 Noted that the the Phenotype comes from Hail, you can download it [here](http://www.bio8.cs.hku.hk/governome/Phenotype/). The default Phenotype is CaffeineConsumption. If you want to change it, you can modify the Phenotype file by yourself. Similarly, you can set `-Toy=false` to use secure parameters, and add `-ReadKey` and `-Verify` to read and verify the proofs from a file.
 
-### Search Person (individual-by-individual genotype analysis)
+### Forensics
 
-As a regulatory authority/law enforcement agency, you have encountered individuals with unidentified identities in your jurisdiction. To determine their identities, you can use Governome's functional batch to confirm their identities. Here, the individual's identity is no longer represented by strings like `HG00096` but is standardized as integers from `0` to `2503`. You can run the following command:
+As authority/law enforcement agency, you have encountered individuals with unidentified identities in your jurisdiction. To determine their identities, you can use the 13 Short Tandem Repeat (D3S1358, vWA, FGA, D8S1179, D21S11, D18S51, D5S818, D13S317, D16S539, THO1, TPOX, CSF1PO, D7S820) in Governome's auxiliary data block to confirm their identities. Here, the individual's identity is no longer represented by strings like `HG00096` but is standardized as integers from `0` to `2503`. You can run the following command:
 
 ```
 cd ../search_person/
