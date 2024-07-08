@@ -169,7 +169,7 @@ cd ../data_owner_query/
 go run main.go -rsid ${Your Target rsID} -user ${DataOwner Name, e.g. HG00096}
 ```
 
-For the sake of demonstration, the parameters used here are highly insecure. If you wish to use secure parameters, please add the statement `-Toy=false`. If you have executed [b](#b-if-you-want-to-generate-all-proofs-and-ciphertexts-for-a-rsid-you-can-execute-the-following-command), you may also choose to add `-read` and `-verify` to read and verify the proofs from a file.
+For the sake of demonstration, the parameters used here are highly insecure. If you wish to use secure parameters, please add the statement `-toy=false`. If you have executed [b](#b-if-you-want-to-generate-all-proofs-and-ciphertexts-for-a-rsid-you-can-execute-the-following-command), you may also choose to add `-read` and `-verify` to read and verify the proofs from a file.
 
 ### Cohort study
 
