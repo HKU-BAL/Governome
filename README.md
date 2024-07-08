@@ -112,7 +112,7 @@ In Governome, data is stored in encrypted form. If you have already downloaded t
 
 ```
 cd ${Governome_DIR}/examples/data_process/
-go run main.go -Segment
+go run main.go -seg
 
 # the raw data is available at ${Governome_RootFolder}/Segments_Enc_Data
 ```
@@ -121,14 +121,14 @@ Since the `1000 Genomes dataset` does not provide short tandem repeat loci, we h
 
 ```
 cd ${Governome_DIR}/examples/data_process/
-go run main.go -Codis -CodisEnc
+go run main.go -str -strenc
 ```
 
 For the sake of demonstration, we have omitted the process of collaboratively generating the public key and evaluation key in ThFHE. You can generate the public and private key pair for TFHE first to facilitate subsequent computations:
 
 ```
 cd ${Governome_DIR}/examples/data_process/
-go run main.go -GenKey
+go run main.go -genkey
 ```
 
 If you want to see how multi-parties collaboratively generating the public key and evaluation key in ThFHE, you can turn to [here](https://github.com/HKU-BAL/Governome/tree/main/ThFHE) for a Simple Demo.
@@ -143,19 +143,19 @@ This module demonstrates how, as a data owner, you will generate the ciphertext 
 
 ```
 cd ../user_proof
-go run main.go -Rsid ${Your Target rsID} -User ${DataOwner Name, e.g. HG00096} -ID ${key custodian ID, 1 or 2 here}
+go run main.go -rsid ${Your Target rsID} -user ${DataOwner Name, e.g. HG00096} -id ${1 or 2, 1 for owners, 2 for hospitals}
 ```
 
 #### b. If you want to generate all proofs and ciphertexts for a rsid, you can execute the following command:
 
 ```
-go run main.go -All -Rsid ${Your Target rsID} 
+go run main.go -all -rsid ${Your Target rsID} 
 ```
 
 #### c. If you want to generate all proofs and ciphertexts for an appID or a segID, you can execute the following command:
 
 ```
-go run main.go -All -APPID ${Your Target appID} 
+go run main.go -all -segID ${Your Target appID or segID} 
 ```
 
 Noted that b and c are prepared for subsequent demonstrations, which take time. If you simply want to experience the full functionality of Governome, please ignore them.
@@ -166,10 +166,10 @@ As a Data Owner, you are highly interested in your own genotype data. To fulfill
 
 ```
 cd ../data_owner_query/
-go run main.go -Rsid ${Your Target rsID} -User ${DataOwner Name, e.g. HG00096}
+go run main.go -rsid ${Your Target rsID} -user ${DataOwner Name, e.g. HG00096}
 ```
 
-For the sake of demonstration, the parameters used here are highly insecure. If you wish to use secure parameters, please add the statement `-Toy=false`. If you have executed [b](#b-if-you-want-to-generate-all-proofs-and-ciphertexts-for-a-rsid-you-can-execute-the-following-command), you may also choose to add `-ReadKey` and `-Verify` to read and verify the proofs from a file.
+For the sake of demonstration, the parameters used here are highly insecure. If you wish to use secure parameters, please add the statement `-Toy=false`. If you have executed [b](#b-if-you-want-to-generate-all-proofs-and-ciphertexts-for-a-rsid-you-can-execute-the-following-command), you may also choose to add `-read` and `-verify` to read and verify the proofs from a file.
 
 ### Cohort study
 
@@ -177,10 +177,10 @@ As the head of a pharmaceutical company, you and your team intend to develop a n
 
 ```
 cd ../querySingleSnp/
-go run main.go -Rsid ${Your Target rsID} -Population ${Your interested population, e.g. EUR}
+go run main.go -rsid ${Your Target rsID} -cohort ${Your interested population, e.g. EUR}
 ```
 
-And you will obtain the result of how the distribution of different genotypes. Similarly, you can set `-Toy=false` to use secure parameters, and add `-ReadKey` and `-Verify` to read and verify the proofs from a file.
+And you will obtain the result of how the distribution of different genotypes. Similarly, you can set `-toy=false` to use secure parameters, and add `-read` and `-verify` to read and verify the proofs from a file.
 
 ### Single SNP GWAS
 
@@ -188,10 +188,10 @@ After obtaining the distribution of Single SNPs, you are not satisfied with simp
 
 ```
 cd ../gwas/
-go run main.go -Rsid ${Your Target rsID} -Population ${Your interested population, e.g. EUR}
+go run main.go -rsid ${Your Target rsID} -cohort ${Your interested population, e.g. EUR}
 ```
 
-Noted that the the Phenotype comes from Hail, you can download it [here](http://www.bio8.cs.hku.hk/governome/Phenotype/). The default Phenotype is CaffeineConsumption. If you want to change it, you can modify the Phenotype file by yourself. Similarly, you can set `-Toy=false` to use secure parameters, and add `-ReadKey` and `-Verify` to read and verify the proofs from a file.
+Noted that the the Phenotype comes from Hail, you can download it [here](http://www.bio8.cs.hku.hk/governome/Phenotype/). The default Phenotype is CaffeineConsumption. If you want to change it, you can modify the Phenotype file by yourself. Similarly, you can set `-toy=false` to use secure parameters, and add `-read` and `-verify` to read and verify the proofs from a file.
 
 ### Forensics
 
@@ -199,10 +199,10 @@ As authority/law enforcement agency, you have encountered individuals with unide
 
 ```
 cd ../search_person/
-go run main.go -GroundTruth ${Your Target Person's ID, 0 ~ 2503}
+go run main.go -groundtruth ${Your Target Person's ID, 0 ~ 2503}
 ```
 
-Here, you can use -GroundTruth to set the individuals of interest. If you do not wish to perform the query on individuals from the `1000 Genomes dataset`, you can set it to `-1`, and we will randomly generate such individuals for you. Similarly, you can set `-Toy=false` to use secure parameters, and add `-ReadKey` and `-Verify` to read and verify the proofs from a file if you have executed [c](#c-if-you-want-to-generate-all-proofs-and-ciphertexts-for-an-appid-or-a-segid-you-can-execute-the-following-command).
+Here, you can use -GroundTruth to set the individuals of interest. If you do not wish to perform the query on individuals from the `1000 Genomes dataset`, you can set it to `-1`, and we will randomly generate such individuals for you. Similarly, you can set `-toy=false` to use secure parameters, and add `-read` and `-verify` to read and verify the proofs from a file if you have executed [c](#c-if-you-want-to-generate-all-proofs-and-ciphertexts-for-an-appid-or-a-segid-you-can-execute-the-following-command).
 
 
 ## Usage
