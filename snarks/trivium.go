@@ -66,8 +66,8 @@ type DefaultCircuit struct {
 
 func Boolean_Scale(api frontend.API, val frontend.Variable) frontend.Variable {
 	temp := api.Sub(1, val)
-	temp = api.Mul(temp, 7)   // 0 -> 7; 1 -> 0
-	temp = api.Add(temp, val) // 0 -> 7; 1 -> 1
+	temp = api.Mul(temp, 7)   // 0 -> 7; 1 -> 0 
+	temp = api.Add(temp, val) // 0 -> 7; 1 -> 1 
 	return api.Mul(temp, Scale_F_Boolean)
 }
 
