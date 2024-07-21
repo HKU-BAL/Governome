@@ -47,7 +47,7 @@ func main() {
 
 	auxiliary.SavePath(*Path)
 
-	flag.Parse()
+	flag.Parse() 
 
 	if *codissymbol {
 		applications.GenAndSaveCODISData()
