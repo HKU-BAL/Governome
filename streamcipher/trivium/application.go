@@ -73,7 +73,7 @@ func Enc_CODIS(c CODIS, pk auxiliary.PublicKey_tfheb) (res CODIS_TFHE) {
 
 // Encrypt a CODIS to TFHE without key
 func Enc_CODIS_Raw(c CODIS, params tfhe.Parameters[uint32]) (res CODIS_TFHE) {
-	for i := 0; i < 13; i++ {
+	for i := 0; i < 13; i++ { 
 		for j := 0; j < 8; j++ {
 			res.Loci[i].Repeat1[j] = NewTFHECiphertext(c.Loci[i].Repeat1[j], params)
 			res.Loci[i].Repeat2[j] = NewTFHECiphertext(c.Loci[i].Repeat2[j], params)
